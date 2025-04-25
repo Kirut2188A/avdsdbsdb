@@ -1,0 +1,318 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Notes App</title>
+    <link rel="stylesheet" href="styles.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div class="app-container">
+        <!-- Notes Explorer -->
+        <div class="panel notes-explorer">
+            <div class="panel-header">
+                <h2>Notes</h2>
+                <div class="notes-actions">
+                    <button class="manage-tags-btn">Manage Tags</button>
+                    <button class="new-note-btn">New Note</button>
+                    <button class="import-note-btn" title="Import Encrypted Note">
+                        <svg width="16" height="16" viewBox="0 0 16 16">
+                            <path d="M8 15A7 7 0 1 1 8 1a7 7 0 0 1 0 14zm0 1A8 8 0 1 0 8 0a8 8 0 0 0 0 16z"/>
+                            <path d="M8 4a.5.5 0 0 1 .5.5v3h3a.5.5 0 0 1 0 1h-3v3a.5.5 0 0 1-1 0v-3h-3a.5.5 0 0 1 0-1h3v-3A.5.5 0 0 1 8 4z"/>
+                        </svg>
+                    </button>
+                </div>
+            </div>
+            <div class="notes-toolbar">
+                <div class="tag-filter">
+                    <select class="tag-filter-select">
+                        <option value="all">All Tags</option>
+                    </select>
+                </div>
+            </div>
+            <div class="notes-list"></div>
+        </div>
+
+        <!-- Tag Management Modal -->
+        <div class="modal tag-modal">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h3>Manage Tags</h3>
+                    <button class="close-modal">×</button>
+                </div>
+                <div class="modal-body">
+                    <div class="create-tag">
+                        <input type="text" class="tag-name-input" placeholder="New tag name">
+                        <input type="color" class="tag-color-input" value="#3498db">
+                        <button class="add-tag-btn">Add Tag</button>
+                    </div>
+                    <div class="tags-list">
+                        <!-- Tags will be listed here -->
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Note Tag Modal -->
+        <div class="modal note-tags-modal">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h3>Manage Note Tags</h3>
+                    <button class="close-modal">×</button>
+                </div>
+                <div class="modal-body">
+                    <div class="note-tags-list">
+                        <!-- Available tags will be listed here with checkboxes -->
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Main Editor -->
+        <div class="panel main-editor">
+            <div class="panel-header">
+                <div class="editor-actions">
+                    <div class="mode-toggle">
+                        <button class="mode-btn" data-mode="view">
+                            <svg width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
+                                <path d="M16 8s-3-5.5-8-5.5S0 8 0 8s3 5.5 8 5.5S16 8 16 8M1.173 8a13.133 13.133 0 0 1 1.66-2.043C4.12 4.668 5.88 3.5 8 3.5c2.12 0 3.879 1.168 5.168 2.457A13.133 13.133 0 0 1 14.828 8c-.058.087-.122.183-.195.288-.335.48-.83 1.12-1.465 1.755C11.879 11.332 10.119 12.5 8 12.5c-2.12 0-3.879-1.168-5.168-2.457A13.134 13.134 0 0 1 1.172 8z"/>
+                                <path d="M8 5.5a2.5 2.5 0 1 0 0 5 2.5 2.5 0 0 0 0-5M4.5 8a3.5 3.5 0 1 1 7 0 3.5 3.5 0 0 1-7 0"/>
+                            </svg>
+                        </button>
+                        <button class="mode-btn" data-mode="edit">
+                            <svg width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
+                                <path d="M12.854.146a.5.5 0 0 0-.707 0L10.5 1.793 14.207 5.5l1.647-1.646a.5.5 0 0 0 0-.708l-3-3zm.646 6.061L9.793 2.5 3.293 9H3.5a.5.5 0 0 1 .5.5v.5h.5a.5.5 0 0 1 .5.5v.5h.5a.5.5 0 0 1 .5.5v.5h.5a.5.5 0 0 1 .5.5v.207l6.5-6.5zm-7.468 7.468A.5.5 0 0 1 6 13.5V13h-.5a.5.5 0 0 1-.5-.5V12h-.5a.5.5 0 0 1-.5-.5V11h-.5a.5.5 0 0 1-.5-.5V10h-.5a.499.499 0 0 1-.175-.032l-.179.178a.5.5 0 0 0-.11.168l-2 5a.5.5 0 0 0 .65.65l5-2a.5.5 0 0 0 .168-.11l.178-.178z"/>
+                            </svg>
+                        </button>
+                        <button class="mode-btn" data-mode="code">
+                            <svg width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
+                                <path d="M5.854 4.854a.5.5 0 1 0-.708-.708l-3.5 3.5a.5.5 0 0 0 0 .708l3.5 3.5a.5.5 0 0 0 .708-.708L2.707 8l3.147-3.146zm4.292 0a.5.5 0 0 1 .708-.708l3.5 3.5a.5.5 0 0 1 0 .708l-3.5 3.5a.5.5 0 0 1-.708-.708L13.293 8l-3.147-3.146z"/>
+                            </svg>
+                        </button>
+                    </div>
+                    <div class="formatting-tools">
+                        <button class="format-btn" data-command="bold" title="Bold">
+                            <svg width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
+                                <path d="M8.21 13c2.106 0 3.412-1.087 3.412-2.823 0-1.306-.984-2.283-2.324-2.386v-.055a2.176 2.176 0 0 0 1.852-2.14c0-1.51-1.162-2.46-3.014-2.46H3.843V13zM5.908 4.674h1.696c.963 0 1.517.451 1.517 1.244 0 .834-.629 1.32-1.73 1.32H5.908V4.673zm0 6.788V8.598h1.73c1.217 0 1.88.492 1.88 1.415 0 .943-.643 1.449-1.832 1.449H5.907z"/>
+                            </svg>
+                        </button>
+                        <button class="format-btn" data-command="italic" title="Italic">
+                            <svg width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
+                                <path d="M7.991 11.674 9.53 4.455c.123-.595.246-.71 1.347-.807l.11-.52H7.211l-.11.52c1.06.096 1.128.212 1.005.807L6.57 11.674c-.123.595-.246.71-1.346.806l-.11.52h3.774l.11-.52c-1.06-.095-1.129-.211-1.006-.806z"/>
+                            </svg>
+                        </button>
+                        <button class="format-btn" data-command="underline" title="Underline">
+                            <svg width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
+                                <path d="M5.313 3.136h-1.23V9.54c0 2.105 1.47 3.623 3.917 3.623s3.917-1.518 3.917-3.623V3.136h-1.23v6.323c0 1.49-.978 2.57-2.687 2.57-1.709 0-2.687-1.08-2.687-2.57V3.136zM12.5 15h-9v-1h9v1z"/>
+                            </svg>
+                        </button>
+                        <button class="format-btn" data-command="createLink" title="Add Link">
+                            <svg width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
+                                <path d="M4.715 6.542 3.343 7.914a3 3 0 1 0 4.243 4.243l1.828-1.829A3 3 0 0 0 8.586 5.5L8 6.086a1.002 1.002 0 0 0-.154.199 2 2 0 0 1 .861 3.337L6.88 11.45a2 2 0 1 1-2.83-2.83l.793-.792a4.018 4.018 0 0 1-.128-1.287z"/>
+                                <path d="M6.586 4.672A3 3 0 0 0 7.414 9.5l.775-.776a2 2 0 0 1-.896-3.346L9.12 3.55a2 2 0 1 1 2.83 2.83l-.793.792c.112.42.155.855.128 1.287l1.372-1.372a3 3 0 1 0-4.243-4.243L6.586 4.672z"/>
+                            </svg>
+                        </button>
+                    </div>
+                </div>
+                <div class="editor-buttons">
+                    <button class="note-tags-btn">Manage Tags</button>
+                    <button class="export-btn" title="Export Note">
+                        <svg width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
+                            <path d="M.5 9.9a.5.5 0 0 1 .5.5v2.5a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-2.5a.5.5 0 0 1 1 0v2.5a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2v-2.5a.5.5 0 0 1 .5-.5"/>
+                            <path d="M7.646 11.854a.5.5 0 0 0 .708 0l3-3a.5.5 0 0 0-.708-.708L8.5 10.293V1.5a.5.5 0 0 0-1 0v8.793L5.354 8.146a.5.5 0 1 0-.708.708l3 3z"/>
+                        </svg>
+                    </button>
+                    <button class="encrypt-btn" title="Encrypt/Decrypt Note">
+                        <svg width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
+                            <path d="M8 1a2 2 0 0 1 2 2v4H6V3a2 2 0 0 1 2-2m3 6V3a3 3 0 0 0-6 0v4a2 2 0 0 0-2 2v5a2 2 0 0 0 2 2h6a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2"/>
+                        </svg>
+                    </button>
+                    <button class="save-btn">Save</button>
+                    <button class="delete-btn">Delete</button>
+                </div>
+            </div>
+            <div class="editor-content">
+                <div id="note-editor" class="rich-editor" contenteditable="false"></div>
+                <div class="code-editor" style="display: none;">
+                    <div class="code-panels">
+                        <div class="code-panel">
+                            <div class="code-panel-header">HTML</div>
+                            <textarea class="html-editor" spellcheck="false"></textarea>
+                        </div>
+                        <div class="code-panel">
+                            <div class="code-panel-header">CSS</div>
+                            <textarea class="css-editor" spellcheck="false"></textarea>
+                        </div>
+                    </div>
+                    <div class="preview-panel">
+                        <div class="code-panel-header">Preview</div>
+                        <iframe class="preview-frame" sandbox="allow-same-origin"></iframe>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- AI Chatbot -->
+        <div class="panel ai-chatbot">
+            <div class="panel-header">
+                <h2>AI Assistant</h2>
+            </div>
+            <div class="chat-container">
+                <div class="api-key-section">
+                    <div class="lock-icon">🔒</div>
+                    <h3>Unlock AI Assistant</h3>
+                    <p>Enter your OpenAI API key to unlock AI features</p>
+                    <div class="api-key-input">
+                        <input type="password" id="api-key-input" placeholder="Enter API key">
+                        <button class="unlock-btn">Unlock</button>
+                    </div>
+                </div>
+                <div class="chat-messages"></div>
+                <div class="chat-input">
+                    <textarea placeholder="Type your message..."></textarea>
+                    <button class="send-btn">Send</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Quick AI Panel -->
+        <div class="quick-ai-panel">
+            <div class="quick-ai-header">
+                <h3>Quick AI Actions</h3>
+                <button class="close-quick-ai">×</button>
+            </div>
+            <div class="quick-ai-content">
+                <div class="selected-text"></div>
+                <div class="quick-ai-edit-options">
+                    <h4>Edit Options</h4>
+                    <div class="edit-actions">
+                        <button class="edit-btn" data-action="summarize-section">Summarize</button>
+                        <button class="edit-btn" data-action="improve-clarity">Improve Clarity</button>
+                        <button class="edit-btn" data-action="fix-grammar">Fix Grammar</button>
+                        <button class="edit-btn" data-action="add-examples">Add Examples</button>
+                        <button class="edit-btn" data-action="add-research">Add Research</button>
+                        <button class="edit-btn" data-action="add-citations">Add Citations</button>
+                        <button class="edit-btn" data-action="change-tone">Change Tone</button>
+                    </div>
+                    <div class="tone-options" style="display: none;">
+                        <select class="tone-select">
+                            <option value="professional">Professional</option>
+                            <option value="casual">Casual</option>
+                            <option value="formal">Formal</option>
+                            <option value="friendly">Friendly</option>
+                            <option value="academic">Academic</option>
+                        </select>
+                        <button class="apply-tone-btn">Apply Tone</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Note Context Menu -->
+    <div class="context-menu" id="noteContextMenu">
+        <div class="context-menu-header">Manage Tags</div>
+        <div class="context-menu-tags">
+            <!-- Tags will be populated here -->
+        </div>
+    </div>
+
+    <!-- Encryption Password Modal -->
+    <div class="modal encryption-modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 class="encryption-modal-title">Encrypt Note</h3>
+                <button class="close-modal">×</button>
+            </div>
+            <div class="modal-body">
+                <div class="encryption-form">
+                    <input type="password" class="encryption-password" placeholder="Enter password">
+                    <div class="encryption-confirm-password-container" style="display: none;">
+                        <input type="password" class="encryption-confirm-password" placeholder="Confirm password">
+                    </div>
+                    <div class="encryption-warning">
+                        Warning: If you forget this password, there is no way to recover the note content.
+                    </div>
+                    <button class="encryption-submit-btn">Encrypt</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Export Modal -->
+    <div class="modal export-modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Export Note</h3>
+                <button class="close-modal">×</button>
+            </div>
+            <div class="modal-body">
+                <div class="export-options">
+                    <div class="export-option" data-format="markdown">
+                        <div class="export-option-header">
+                            <h4>Markdown</h4>
+                            <span class="export-option-desc">Best for sharing on GitHub, documentation sites</span>
+                        </div>
+                        <button class="export-option-btn" data-format="markdown">Export as .md</button>
+                    </div>
+                    <div class="export-option" data-format="html">
+                        <div class="export-option-header">
+                            <h4>HTML</h4>
+                            <span class="export-option-desc">Complete webpage with styles</span>
+                        </div>
+                        <button class="export-option-btn" data-format="html">Export as .html</button>
+                    </div>
+                    <div class="export-option" data-format="pdf-html">
+                        <div class="export-option-header">
+                            <h4>PDF-ready HTML</h4>
+                            <span class="export-option-desc">Optimized for PDF conversion</span>
+                        </div>
+                        <button class="export-option-btn" data-format="pdf-html">Export as .html</button>
+                    </div>
+                    <div class="export-option" data-format="txt">
+                        <div class="export-option-header">
+                            <h4>Plain Text</h4>
+                            <span class="export-option-desc">Simple text without formatting</span>
+                        </div>
+                        <button class="export-option-btn" data-format="txt">Export as .txt</button>
+                    </div>
+                    <div class="export-option" data-format="pdf">
+                        <div class="export-option-header">
+                            <h4>PDF</h4>
+                            <span class="export-option-desc">Professional document format</span>
+                        </div>
+                        <button class="export-option-btn" data-format="pdf">Export as .pdf</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Import Modal -->
+    <div class="modal import-modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Import Encrypted Note</h3>
+                <button class="close-modal">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="import-form">
+                    <div class="file-input-container">
+                        <input type="file" id="noteFileInput" accept=".json" class="note-file-input">
+                        <label for="noteFileInput" class="file-input-label">Choose File</label>
+                        <span class="selected-file-name">No file selected</span>
+                    </div>
+                    <div class="password-input-container">
+                        <input type="password" class="import-password" placeholder="Enter decryption password">
+                    </div>
+                    <button class="import-submit-btn">Import Note</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+    <script src="app.js"></script>
+</body>
+</html> 
