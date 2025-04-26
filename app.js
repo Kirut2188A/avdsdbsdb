@@ -1040,7 +1040,7 @@ function addMessageToChat(message, sender) {
 // Update handleTextSelection function
 function handleTextSelection() {
     const selection = window.getSelection();
-    const selectedText = selection.toString().trim();
+    selectedText = selection.toString().trim(); // Update the global selectedText variable
 
     if (selectedText) {
         quickAIPanel.classList.add('visible');
