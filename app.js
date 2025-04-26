@@ -269,6 +269,9 @@ function init() {
         loadNote(notes[0].id);
     }
     
+    // Initialize the Quick AI panel
+    initializeQuickAIPanel();
+    
     setupEventListeners();
     setMode('view'); // Start in view mode
     setupExportHandlers();
@@ -1141,62 +1144,135 @@ function handleTextSelection() {
     selectedText = selection.toString().trim();
 
     if (selectedText) {
-        quickAIPanel.classList.add('visible');
-        // Rebuild the panel UI
-        quickAIPanel.innerHTML = `
-            <div class="quick-ai-header">Edit Options</div>
-            <div class="edit-options">
-                <button class="edit-btn" data-action="summarize">Summarize</button>
-                <button class="edit-btn" data-action="clarify">Clarify</button>
-                <button class="edit-btn" data-action="fix-grammar">Fix Grammar</button>
-                <button class="edit-btn" data-action="add-examples">Add Examples</button>
-                <button class="edit-btn" data-action="add-research">Add Research</button>
-                <button class="edit-btn" data-action="add-citations">Add Citations</button>
-                <button class="edit-btn" data-action="change-tone">Change Tone</button>
-                <button class="edit-btn" data-action="format-better">Format Better</button>
-                <button class="edit-btn" data-action="split-sections">Split into Sections</button>
-            </div>
-            <div class="selected-text" style="margin:12px 0 8px 0; background:var(--bg-tertiary); padding:10px; border-radius:4px; color:var(--text-primary); white-space:pre-wrap;"></div>
-            <button class="undo-btn" style="display: none;">Undo Last Change</button>
-        `;
-        // Set the selected text in the new element
+        // Instead of rebuilding the entire panel, just update the selected text and show it
         const selectedTextDiv = quickAIPanel.querySelector('.selected-text');
-        if (selectedTextDiv) selectedTextDiv.textContent = selectedText;
-
-        // Add event listeners to the buttons
-        quickAIPanel.querySelectorAll('.edit-btn').forEach(button => {
-            button.addEventListener('click', () => {
-                const action = button.dataset.action;
-                if (action === 'change-tone' && toneOptions) {
-                    toneOptions.style.display = 'flex';
-                } else {
-                    handleQuickAIAction(action);
-                }
-            });
-        });
-        // Add undo button event listener
-        const undoBtn = quickAIPanel.querySelector('.undo-btn');
-        if (undoBtn) {
-            undoBtn.addEventListener('click', handleUndo);
+        if (selectedTextDiv) {
+            selectedTextDiv.textContent = selectedText;
         }
-        // Append deepSearchSection if not already present
-        if (!quickAIPanel.contains(deepSearchSection)) {
-            quickAIPanel.appendChild(deepSearchSection);
+        
+        // Show the panel
+        quickAIPanel.classList.add('visible');
+        
+        // Perform initial AI analysis if API key is available
+        if (apiKey) {
+            performAIAnalysis(selectedText);
         }
-        // Always re-attach expand button event listener
-        const expandBtn = deepSearchSection.querySelector('.expand-analysis-btn');
-        if (expandBtn) {
-            expandBtn.onclick = () => {
-                const selectedText = selectedTextDiv ? selectedTextDiv.textContent : '';
-                if (selectedText && lastAnalysis) {
-                    openAnalysisModal(selectedText, lastAnalysis);
-                }
-            };
-        }
-        // Perform initial AI analysis
-        performAIAnalysis(selectedText);
     } else {
         quickAIPanel.classList.remove('visible');
+    }
+}
+
+// Add this function to initialize the Quick AI panel
+function initializeQuickAIPanel() {
+    quickAIPanel.innerHTML = `
+        <div class="quick-ai-header">
+            <h3>Quick AI Actions</h3>
+            <button class="close-quick-ai">×</button>
+        </div>
+        <div class="quick-ai-content">
+            <div class="selected-text"></div>
+            <div class="quick-ai-edit-options">
+                <h4>Edit Options</h4>
+                <div class="edit-actions">
+                    <button class="edit-btn" data-action="summarize">Summarize</button>
+                    <button class="edit-btn" data-action="clarify">Clarify</button>
+                    <button class="edit-btn" data-action="fix-grammar">Fix Grammar</button>
+                    <button class="edit-btn" data-action="add-examples">Add Examples</button>
+                    <button class="edit-btn" data-action="add-research">Add Research</button>
+                    <button class="edit-btn" data-action="add-citations">Add Citations</button>
+                    <button class="edit-btn" data-action="change-tone">Change Tone</button>
+                    <button class="edit-btn" data-action="format-better">Format Better</button>
+                    <button class="edit-btn" data-action="split-sections">Split into Sections</button>
+                </div>
+                <div class="tone-options" style="display: none;">
+                    <select class="tone-select">
+                        <option value="professional">Professional</option>
+                        <option value="casual">Casual</option>
+                        <option value="formal">Formal</option>
+                        <option value="friendly">Friendly</option>
+                        <option value="academic">Academic</option>
+                    </select>
+                    <button class="apply-tone-btn">Apply Tone</button>
+                </div>
+            </div>
+            <div class="deep-search-section">
+                <div class="deep-search-header">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M12 2a10 10 0 1 0 10 10A10 10 0 0 0 12 2zm0 18a8 8 0 1 1 8-8 8 8 0 0 1-8 8z"/>
+                        <path d="M12 6a2 2 0 1 0 2 2 2 2 0 0 0-2-2zm0 10a1 1 0 0 0-1-1h0a1 1 0 0 0-1 1v0a1 1 0 0 0 1 1h0a1 1 0 0 0 1-1z"/>
+                    </svg>
+                    <h4>AI Deep Analysis</h4>
+                    <button class="expand-analysis-btn" title="Open in full view">
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M15 3h6v6M9 21H3v-6M21 3l-7 7M3 21l7-7"/>
+                        </svg>
+                    </button>
+                </div>
+                <div class="deep-search-results"></div>
+                <button class="deep-search-btn">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M12 2a10 10 0 1 0 10 10A10 10 0 0 0 12 2zm0 18a8 8 0 1 1 8-8 8 8 0 0 1-8 8z"/>
+                        <path d="M15 9l-6 6M9 9l6 6"/>
+                    </svg>
+                    Analyze with AI
+                </button>
+            </div>
+        </div>
+    `;
+
+    // Add event listeners to the buttons
+    quickAIPanel.querySelectorAll('.edit-btn').forEach(button => {
+        button.addEventListener('click', () => {
+            const action = button.dataset.action;
+            if (action === 'change-tone') {
+                const toneOptions = quickAIPanel.querySelector('.tone-options');
+                if (toneOptions) {
+                    toneOptions.style.display = 'flex';
+                }
+            } else {
+                handleQuickAIAction(action);
+            }
+        });
+    });
+
+    // Add event listener for the apply tone button
+    const applyToneBtn = quickAIPanel.querySelector('.apply-tone-btn');
+    const toneSelect = quickAIPanel.querySelector('.tone-select');
+    if (applyToneBtn && toneSelect) {
+        applyToneBtn.addEventListener('click', () => {
+            const tone = toneSelect.value;
+            handleToneChange(tone);
+        });
+    }
+
+    // Add close button event listener
+    const closeBtn = quickAIPanel.querySelector('.close-quick-ai');
+    if (closeBtn) {
+        closeBtn.addEventListener('click', () => {
+            quickAIPanel.classList.remove('visible');
+        });
+    }
+
+    // Add deep search button event listener
+    const deepSearchBtn = quickAIPanel.querySelector('.deep-search-btn');
+    if (deepSearchBtn) {
+        deepSearchBtn.addEventListener('click', () => {
+            if (!apiKey) {
+                alert('Please unlock the AI Assistant first');
+                return;
+            }
+            performAIAnalysis(selectedText);
+        });
+    }
+
+    // Add expand analysis button event listener
+    const expandBtn = quickAIPanel.querySelector('.expand-analysis-btn');
+    if (expandBtn) {
+        expandBtn.addEventListener('click', () => {
+            if (selectedText && lastAnalysis) {
+                openAnalysisModal(selectedText, lastAnalysis);
+            }
+        });
     }
 }
 
