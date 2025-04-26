@@ -570,6 +570,15 @@ function setupEventListeners() {
     if (importSubmitBtn) {
         importSubmitBtn.addEventListener('click', handleImportNote);
     }
+
+    // Add event listener for deep search button
+    deepSearchSection.querySelector('.deep-search-btn').addEventListener('click', () => {
+        if (!apiKey) {
+            alert('Please unlock the AI Assistant first');
+            return;
+        }
+        performAIAnalysis(selectedText);
+    });
 }
 
 // Update format buttons state based on current selection
@@ -979,12 +988,36 @@ async function sendMessage() {
             message.toLowerCase().includes('note')
         );
 
+        // Check if this is a split sections command
+        const isSplitCommand = message.toLowerCase().includes('split') && 
+                             (message.toLowerCase().includes('section') || 
+                              message.toLowerCase().includes('part'));
+
         // Show thinking effect
         showAIThinking();
 
         // Prepare system prompt based on command type
-        const systemPrompt = isGenerateCommand ? 
-            `You are an AI assistant that generates high-quality content for notes. 
+        let systemPrompt, userPrompt;
+        
+        if (isSplitCommand) {
+            systemPrompt = `You are an expert at organizing text into clear sections while preserving its exact meaning. Output only the formatted HTML with no explanations or extra text. Focus on:
+1. Creating logical section breaks
+2. Using appropriate heading levels (h2-h6)
+3. Maintaining proper HTML structure
+4. Preserving all original content
+5. Keeping consistent spacing
+6. Maintaining the original tone and style`;
+            userPrompt = `Split the following text into clear, well-organized sections with appropriate headings. Follow these rules strictly:
+1. Maintain the exact same information and meaning
+2. Use proper semantic HTML elements (h2-h6 for section headings)
+3. Break the content into logical sections
+4. Add appropriate spacing between sections
+5. Keep important emphasis and links
+6. Do not add or remove any factual content
+7. Do not change the writing style or tone
+Text to split: "${noteContent}"`;
+        } else if (isGenerateCommand) {
+            systemPrompt = `You are an AI assistant that generates high-quality content for notes. 
              When generating content:
              1. Format output in proper HTML with semantic tags (<h1>, <h2>, <p>, <ul>, <li>, etc.)
              2. Maintain a consistent style with existing content
@@ -993,12 +1026,12 @@ async function sendMessage() {
              5. If adding to existing content, ensure smooth transition
              6. Use appropriate headings for structure
              7. ONLY output the HTML content, no explanations
-             Current note content for context: "${noteContent}"` :
-            'You are a helpful AI assistant for a notes app. Provide helpful responses and insights about the note content.';
-
-        const userPrompt = isGenerateCommand ?
-            `Based on this request: "${message}", generate appropriate HTML content that should be added to the note.` :
-            `${message}\n\nCurrent Note Content: ${noteContent}`;
+             Current note content for context: "${noteContent}"`;
+            userPrompt = `Based on this request: "${message}", generate appropriate HTML content that should be added to the note.`;
+        } else {
+            systemPrompt = 'You are a helpful AI assistant for a notes app. Provide helpful responses and insights about the note content.';
+            userPrompt = `${message}\n\nCurrent Note Content: ${noteContent}`;
+        }
 
         const response = await fetch('https://api.openai.com/v1/chat/completions', {
             method: 'POST',
@@ -1027,21 +1060,20 @@ async function sendMessage() {
         if (data.choices && data.choices[0]) {
             const aiResponse = data.choices[0].message.content;
             
-            if (isGenerateCommand) {
+            if (isSplitCommand || isGenerateCommand) {
                 // Sanitize the generated HTML
                 const tempDiv = document.createElement('div');
                 tempDiv.innerHTML = aiResponse;
                 sanitizeHTML(tempDiv);
                 
-                // Add the new content to the note with typing effect
-                const currentContent = noteEditor.innerHTML;
-                noteEditor.innerHTML = currentContent + '\n' + tempDiv.innerHTML;
+                // Update the note content
+                noteEditor.innerHTML = tempDiv.innerHTML;
                 
                 // Save the updated note
                 saveCurrentNote();
                 
                 // Confirm to user
-                addMessageToChat('I\'ve added the generated content to your note. Let me know if you\'d like any changes!', 'assistant');
+                addMessageToChat('I\'ve updated your note with the requested changes. Let me know if you\'d like any adjustments!', 'assistant');
             } else {
                 // Regular chat response
                 addMessageToChat(aiResponse, 'assistant');
@@ -1110,16 +1142,7 @@ function handleTextSelection() {
 
     if (selectedText) {
         quickAIPanel.classList.add('visible');
-        selectedTextDisplay.textContent = selectedText;
-        
-        // Store the original text and selection range for undo
-        const range = selection.getRangeAt(0);
-        lastEdit = {
-            text: selectedText,
-            range: range.cloneRange(),
-            action: null
-        };
-        
+        // Rebuild the panel UI
         quickAIPanel.innerHTML = `
             <div class="quick-ai-header">Edit Options</div>
             <div class="edit-options">
@@ -1131,24 +1154,14 @@ function handleTextSelection() {
                 <button class="edit-btn" data-action="add-citations">Add Citations</button>
                 <button class="edit-btn" data-action="change-tone">Change Tone</button>
                 <button class="edit-btn" data-action="format-better">Format Better</button>
+                <button class="edit-btn" data-action="split-sections">Split into Sections</button>
             </div>
+            <div class="selected-text" style="margin:12px 0 8px 0; background:var(--bg-tertiary); padding:10px; border-radius:4px; color:var(--text-primary); white-space:pre-wrap;"></div>
             <button class="undo-btn" style="display: none;">Undo Last Change</button>
-            <div class="deep-search-section">
-                <div class="deep-search-header">
-                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                        <circle cx="11" cy="11" r="8"></circle>
-                        <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
-                    </svg>
-                    <h4>AI Deep Analysis</h4>
-                    <button class="expand-analysis-btn" title="Open in full view">
-                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                            <path d="M15 3h6v6M9 21H3v-6M21 3l-7 7M3 21l7-7"/>
-                        </svg>
-                    </button>
-                </div>
-                <div class="deep-search-results"></div>
-            </div>
         `;
+        // Set the selected text in the new element
+        const selectedTextDiv = quickAIPanel.querySelector('.selected-text');
+        if (selectedTextDiv) selectedTextDiv.textContent = selectedText;
 
         // Add event listeners to the buttons
         quickAIPanel.querySelectorAll('.edit-btn').forEach(button => {
@@ -1161,13 +1174,25 @@ function handleTextSelection() {
                 }
             });
         });
-
         // Add undo button event listener
         const undoBtn = quickAIPanel.querySelector('.undo-btn');
         if (undoBtn) {
             undoBtn.addEventListener('click', handleUndo);
         }
-        
+        // Append deepSearchSection if not already present
+        if (!quickAIPanel.contains(deepSearchSection)) {
+            quickAIPanel.appendChild(deepSearchSection);
+        }
+        // Always re-attach expand button event listener
+        const expandBtn = deepSearchSection.querySelector('.expand-analysis-btn');
+        if (expandBtn) {
+            expandBtn.onclick = () => {
+                const selectedText = selectedTextDiv ? selectedTextDiv.textContent : '';
+                if (selectedText && lastAnalysis) {
+                    openAnalysisModal(selectedText, lastAnalysis);
+                }
+            };
+        }
         // Perform initial AI analysis
         performAIAnalysis(selectedText);
     } else {
@@ -1204,6 +1229,11 @@ function handleUndo() {
 let lastAnalysis = '';
 
 async function performAIAnalysis(text) {
+    if (!text || text.trim().length === 0) {
+        alert('Please select some text to analyze first');
+        return;
+    }
+
     const deepSearchResults = deepSearchSection.querySelector('.deep-search-results');
     deepSearchResults.innerHTML = `
         <div style="color: var(--text-secondary); text-align: center; padding: 20px;">
@@ -1212,20 +1242,43 @@ async function performAIAnalysis(text) {
     `;
 
     try {
-        const prompt = `Please provide a deep analysis of this text: "${text}". Include:
-1. Key concepts and their explanations
-2. Related topics and connections
-3. Potential implications or applications
-4. Any relevant technical details
-5. Common misconceptions or important clarifications`;
+        const prompt = `Please provide a comprehensive analysis of this text: "${text}". Include:
+
+1. Main Concepts and Themes
+   - Key ideas and their significance
+   - Central arguments or points
+   - Underlying assumptions
+
+2. Technical Details and Context
+   - Important terminology and definitions
+   - Relevant background information
+   - Technical specifications or requirements
+
+3. Connections and Relationships
+   - How this relates to other topics
+   - Dependencies or prerequisites
+   - Similar concepts or contrasting ideas
+
+4. Practical Applications
+   - Real-world use cases
+   - Implementation considerations
+   - Potential challenges or limitations
+
+5. Critical Analysis
+   - Strengths and weaknesses
+   - Common misconceptions
+   - Areas for further exploration
+
+Please format your response with clear headings and bullet points where appropriate.`;
 
         const response = await sendToAI(prompt);
-        lastAnalysis = response; // Store the analysis
+        lastAnalysis = response;
         displayAIResults(response, deepSearchResults);
     } catch (error) {
+        console.error('AI Analysis Error:', error);
         deepSearchResults.innerHTML = `
             <div style="color: var(--text-secondary); text-align: center; padding: 20px;">
-                Error performing AI analysis. Please try again.
+                Error performing AI analysis: ${error.message || 'Please try again'}
             </div>
         `;
     }
@@ -1268,26 +1321,51 @@ async function sendToAI(prompt) {
 }
 
 // Function to display AI analysis results
-function displayAIResults(analysisText, container, isModal = false) {
-    // Convert the analysis text to HTML with proper formatting
-    const formattedAnalysis = analysisText
-        .split('\n')
-        .map(line => {
-            if (line.match(/^\d\./)) {
-                return `<div class="analysis-point">${line}</div>`;
-            } else if (line.trim().length === 0) {
-                return '<br>';
-            } else {
-                return `<div class="analysis-text">${line}</div>`;
-            }
-        })
-        .join('');
+function displayAIResults(text, container) {
+    // Split the text into sections based on numbered headings
+    const sections = text.split(/\n(?=\d+\.)/);
+    
+    let html = '<div class="analysis-results">';
+    
+    sections.forEach(section => {
+        if (!section.trim()) return;
+        
+        // Extract the heading and content
+        const [heading, ...content] = section.split('\n');
+        const contentText = content.join('\n').trim();
+        
+        // Format the section
+        html += `
+            <div class="analysis-section">
+                <h3 class="analysis-heading">${heading}</h3>
+                <div class="analysis-content">
+                    ${formatAnalysisContent(contentText)}
+                </div>
+            </div>
+        `;
+    });
+    
+    html += '</div>';
+    container.innerHTML = html;
+}
 
-    container.innerHTML = `
-        <div class="analysis-container${isModal ? ' modal-analysis' : ''}">
-            ${formattedAnalysis}
-        </div>
-    `;
+function formatAnalysisContent(text) {
+    // Convert markdown-style bullet points to HTML
+    let html = text
+        .replace(/^\s*-\s*(.*)$/gm, '<li>$1</li>') // Convert - to <li>
+        .replace(/^\s*\*\s*(.*)$/gm, '<li>$1</li>'); // Convert * to <li>
+    
+    // Group consecutive <li> elements into <ul>
+    html = html.replace(/(<li>.*?<\/li>\n?)+/g, '<ul>$&</ul>');
+    
+    // Convert double newlines to paragraphs
+    html = html.split('\n\n').map(para => {
+        if (!para.trim()) return '';
+        if (para.startsWith('<ul>')) return para;
+        return `<p>${para}</p>`;
+    }).join('');
+    
+    return html;
 }
 
 // Function to open analysis in modal
@@ -1397,6 +1475,24 @@ Text to format: "${selectedText}"`;
             prompt = `Rewrite the following text in a different tone while maintaining its meaning: "${selectedText}"`;
             systemPrompt = 'You are a helpful AI assistant that can rewrite text in different tones while preserving the original meaning.';
             break;
+        case 'split-sections':
+            prompt = `Split the following text into clear, well-organized sections with appropriate headings. Follow these rules strictly:
+1. Maintain the exact same information and meaning
+2. Use proper semantic HTML elements (h2-h6 for section headings)
+3. Break the content into logical sections
+4. Add appropriate spacing between sections
+5. Keep important emphasis and links
+6. Do not add or remove any factual content
+7. Do not change the writing style or tone
+Text to split: "${selectedText}"`;
+            systemPrompt = `You are an expert at organizing text into clear sections while preserving its exact meaning. Output only the formatted HTML with no explanations or extra text. Focus on:
+1. Creating logical section breaks
+2. Using appropriate heading levels (h2-h6)
+3. Maintaining proper HTML structure
+4. Preserving all original content
+5. Keeping consistent spacing
+6. Maintaining the original tone and style`;
+            break;
     }
 
     try {
@@ -1428,11 +1524,11 @@ Text to format: "${selectedText}"`;
             const editedText = data.choices[0].message.content;
             
             if (['summarize-section', 'improve-clarity', 'clarify', 'fix-grammar', 'add-examples', 
-                 'add-research', 'add-citations', 'format-better'].includes(action)) {
+                 'add-research', 'add-citations', 'format-better', 'split-sections'].includes(action)) {
                 const range = window.getSelection().getRangeAt(0);
                 const tempDiv = document.createElement('div');
                 
-                if (action === 'add-citations' || action === 'format-better') {
+                if (['add-citations', 'format-better', 'split-sections'].includes(action)) {
                     tempDiv.innerHTML = editedText;
                 } else {
                     tempDiv.innerHTML = `<p>${editedText}</p>`;
