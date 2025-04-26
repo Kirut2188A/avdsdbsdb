@@ -1,2172 +1,319 @@
-:root {
-    --bg-primary: #000000;
-    --bg-secondary: #0a0a0a;
-    --bg-tertiary: #111111;
-    --text-primary: #ffffff;
-    --text-secondary: #888888;
-    --accent-primary: #2a2a2a;
-    --accent-hover: #333333;
-    --accent-secondary: #404040;
-    --border-color: #1a1a1a;
-    --hover-color: #1a1a1a;
-}
-
-* {
-    margin: 0;
-    padding: 0;
-    box-sizing: border-box;
-    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
-}
-
-body {
-    background-color: var(--bg-primary);
-    color: var(--text-primary);
-    height: 100vh;
-    overflow: hidden;
-}
-
-.app-container {
-    display: flex;
-    height: 100vh;
-    gap: 1px;
-    background-color: var(--border-color);
-    overflow: hidden;
-    padding: 20px;
-}
-
-.panel {
-    display: flex;
-    flex-direction: column;
-    background-color: var(--bg-secondary);
-    border: 1px solid var(--border-color);
-    border-radius: 8px;
-    height: calc(100vh - 40px);
-    overflow: hidden;
-    animation: scaleIn 0.4s ease-out;
-    transition: all 0.3s ease;
-}
-
-.panel-header {
-    padding: 15px 20px;
-    background-color: var(--bg-tertiary);
-    border-bottom: 1px solid var(--border-color);
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    flex-shrink: 0;
-}
-
-.panel-header h2 {
-    font-size: 1.2rem;
-    color: var(--text-primary);
-    font-weight: 500;
-    letter-spacing: 0.5px;
-}
-
-.editor-actions {
-    display: flex;
-    gap: 10px;
-    align-items: center;
-}
-
-.mode-toggle {
-    display: flex;
-    gap: 2px;
-    background-color: var(--bg-tertiary);
-    padding: 2px;
-    border-radius: 6px;
-    border: 1px solid var(--border-color);
-}
-
-.mode-btn {
-    background: none;
-    border: none;
-    padding: 6px 10px;
-    border-radius: 4px;
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    color: var(--text-secondary);
-    transition: all 0.2s ease;
-}
-
-.mode-btn:hover {
-    color: var(--text-primary);
-    background-color: var(--hover-color);
-    transform: translateY(-1px);
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
-}
-
-.mode-btn.active {
-    color: var(--text-primary);
-    background-color: var(--accent-primary);
-}
-
-.formatting-tools {
-    display: flex;
-    gap: 4px;
-    background-color: var(--bg-tertiary);
-    padding: 4px;
-    border-radius: 6px;
-    border: 1px solid var(--border-color);
-}
-
-.format-btn {
-    background: none;
-    border: none;
-    padding: 6px 8px;
-    border-radius: 4px;
-    cursor: pointer;
-    font-size: 0.9rem;
-    min-width: 28px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    color: var(--text-secondary);
-    transition: all 0.2s ease;
-}
-
-.format-btn:hover {
-    color: var(--text-primary);
-    background-color: var(--hover-color);
-    transform: translateY(-1px);
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
-}
-
-.format-btn.active {
-    color: var(--text-primary);
-    background-color: var(--accent-primary);
-}
-
-.editor-buttons {
-    display: flex;
-    gap: 8px;
-}
-
-button {
-    padding: 8px 16px;
-    border: none;
-    border-radius: 6px;
-    cursor: pointer;
-    font-size: 0.9rem;
-    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
-    font-weight: 500;
-    letter-spacing: 0.3px;
-    background-color: var(--bg-tertiary);
-    color: var(--text-primary);
-}
-
-button:hover {
-    background-color: var(--hover-color);
-}
-
-button:active {
-    transform: scale(0.95);
-}
-
-.new-note-btn {
-    background-color: var(--accent-primary);
-    color: var(--text-primary);
-    border: 1px solid var(--border-color);
-}
-
-.new-note-btn:hover {
-    background-color: var(--accent-hover);
-}
-
-.save-btn {
-    background-color: var(--accent-primary);
-    color: var(--text-primary);
-    border: 1px solid var(--border-color);
-}
-
-.save-btn:hover {
-    background-color: var(--accent-hover);
-}
-
-.delete-btn {
-    background-color: var(--accent-secondary);
-    color: var(--text-primary);
-    border: 1px solid var(--border-color);
-}
-
-.delete-btn:hover {
-    background-color: #4a4a4a;
-}
-
-/* Notes Explorer */
-.notes-explorer {
-    width: 300px;
-    flex-shrink: 0;
-    background-color: var(--bg-secondary);
-}
-
-.notes-list {
-    flex: 1;
-    overflow-y: auto;
-    padding: 15px;
-    min-height: 0;
-    scroll-behavior: smooth;
-}
-
-.note-item {
-    padding: 16px;
-    margin-bottom: 12px;
-    background-color: var(--bg-tertiary);
-    border: 1px solid var(--border-color);
-    border-radius: 8px;
-    cursor: pointer;
-    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-    animation: slideIn 0.3s ease-out;
-}
-
-.note-item:hover {
-    transform: translateX(4px) scale(1.01);
-    background-color: var(--accent-primary);
-}
-
-.note-item.active {
-    background-color: var(--accent-primary);
-    border-color: var(--accent-secondary);
-    position: relative;
-    animation: glow 2s infinite;
-}
-
-.note-item.active::before {
-    content: '';
-    position: absolute;
-    left: 0;
-    top: 0;
-    bottom: 0;
-    width: 4px;
-    background-color: var(--text-secondary);
-    border-radius: 4px 0 0 4px;
-}
-
-.note-title {
-    font-size: 0.95rem;
-    font-weight: 500;
-    color: var(--text-primary);
-    margin-bottom: 8px;
-    line-height: 1.4;
-    word-wrap: break-word;
-}
-
-.note-summary {
-    font-size: 0.85rem;
-    color: var(--text-secondary);
-    margin-top: 8px;
-    line-height: 1.5;
-    word-wrap: break-word;
-}
-
-.note-date {
-    font-size: 0.75rem;
-    color: var(--text-secondary);
-    opacity: 0.7;
-    margin-top: 8px;
-}
-
-/* Main Editor */
-.main-editor {
-    flex: 1;
-    position: relative;
-}
-
-.editor-content {
-    flex: 1;
-    padding: 20px;
-    overflow: hidden;
-    display: flex;
-    flex-direction: column;
-    min-height: 0;
-}
-
-.rich-editor {
-    flex: 1;
-    padding: 20px;
-    font-size: 1rem;
-    line-height: 1.6;
-    background-color: var(--bg-secondary);
-    color: var(--text-primary);
-    border-radius: 6px;
-    border: 1px solid var(--border-color);
-    overflow-y: auto;
-    min-height: 0;
-    transition: all 0.3s ease;
-    user-select: text;
-    -webkit-user-select: text;
-    -moz-user-select: text;
-    -ms-user-select: text;
-}
-
-.rich-editor:focus {
-    outline: none;
-    background-color: var(--bg-tertiary);
-    box-shadow: 0 0 0 2px var(--accent-primary);
-}
-
-/* View/Edit Mode Styles */
-.view-mode .formatting-tools {
-    display: none;
-}
-
-.view-mode .rich-editor {
-    background-color: var(--bg-tertiary);
-    user-select: text;
-    pointer-events: auto;
-}
-
-.view-mode .rich-editor a {
-    pointer-events: auto;
-    cursor: pointer;
-}
-
-.edit-mode .formatting-tools {
-    display: flex;
-}
-
-/* Rich Text Styles */
-.rich-editor {
-    user-select: text;
-    -webkit-user-select: text;
-    -moz-user-select: text;
-    -ms-user-select: text;
-}
-
-.rich-editor a {
-    color: var(--accent-primary);
-    text-decoration: underline;
-    cursor: pointer;
-}
-
-.rich-editor a:hover {
-    opacity: 0.8;
-}
-
-/* Quick AI Panel */
-.quick-ai-panel {
-    position: fixed;
-    right: 0;
-    top: 0;
-    width: 300px;
-    height: 100vh;
-    background-color: var(--bg-secondary);
-    border-left: 1px solid var(--border-color);
-    transform: translateX(100%);
-    transition: transform 0.3s ease;
-    z-index: 1000;
-    display: flex;
-    flex-direction: column;
-}
-
-.quick-ai-panel.visible {
-    transform: translateX(0);
-}
-
-.quick-ai-header {
-    padding: 16px;
-    border-bottom: 1px solid var(--border-color);
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    background-color: var(--bg-secondary);
-    position: sticky;
-    top: 0;
-    z-index: 1;
-}
-
-.quick-ai-header h3 {
-    font-size: 1.1rem;
-    color: var(--text-primary);
-}
-
-.close-quick-ai {
-    background: none;
-    border: none;
-    color: var(--text-secondary);
-    font-size: 1.5rem;
-    cursor: pointer;
-    padding: 0;
-}
-
-.quick-ai-content {
-    flex: 1;
-    overflow-y: auto;
-    padding: 16px;
-    display: flex;
-    flex-direction: column;
-    gap: 16px;
-}
-
-.selected-text {
-    padding: 12px;
-    background-color: var(--bg-tertiary);
-    border-radius: 4px;
-    margin-bottom: 16px;
-    white-space: pre-wrap;
-}
-
-.quick-ai-edit-options {
-    display: flex;
-    flex-direction: column;
-    gap: 16px;
-}
-
-.edit-actions {
-    display: grid;
-    grid-template-columns: repeat(2, 1fr);
-    gap: 8px;
-}
-
-.edit-btn {
-    padding: 8px 12px;
-    background-color: var(--bg-tertiary);
-    border: 1px solid var(--border-color);
-    border-radius: 4px;
-    cursor: pointer;
-    transition: background-color 0.2s;
-    text-align: left;
-}
-
-.edit-btn:hover {
-    background-color: var(--bg-hover);
-}
-
-.tone-options {
-    margin-top: 10px;
-    display: flex;
-    gap: 8px;
-}
-
-.tone-select {
-    flex: 1;
-    padding: 8px;
-    background-color: var(--bg-secondary);
-    color: var(--text-primary);
-    border: 1px solid var(--border-color);
-    border-radius: 4px;
-    font-size: 0.8rem;
-    cursor: pointer;
-}
-
-.apply-tone-btn {
-    padding: 8px 12px;
-    background-color: var(--accent-primary);
-    color: var(--text-primary);
-    border: none;
-    border-radius: 4px;
-    cursor: pointer;
-    font-size: 0.8rem;
-    transition: all 0.2s ease;
-}
-
-.apply-tone-btn:hover {
-    background-color: var(--accent-hover);
-}
-
-/* AI Chatbot Panel */
-.ai-chatbot {
-    width: 320px;
-    flex-shrink: 0;
-    background-color: var(--bg-secondary);
-    display: flex;
-    flex-direction: column;
-}
-
-.chat-container {
-    display: flex;
-    flex-direction: column;
-    height: 100%;
-    overflow: hidden;
-    background-color: var(--bg-secondary);
-}
-
-/* API Key Section */
-.api-key-section {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    padding: 40px 20px;
-    text-align: center;
-    height: 100%;
-    background-color: var(--bg-secondary);
-}
-
-.lock-icon {
-    font-size: 48px;
-    margin-bottom: 20px;
-    color: #ffd700;
-}
-
-.api-key-section h3 {
-    font-size: 1.2rem;
-    margin-bottom: 10px;
-    color: var(--text-primary);
-    font-weight: 500;
-}
-
-.api-key-section p {
-    color: var(--text-secondary);
-    margin-bottom: 25px;
-    font-size: 0.9rem;
-    max-width: 280px;
-    line-height: 1.5;
-}
-
-.api-key-input {
-    display: flex;
-    gap: 10px;
-    width: 100%;
-    max-width: 280px;
-}
-
-.api-key-input input {
-    flex: 1;
-    padding: 12px;
-    border: 1px solid var(--border-color);
-    border-radius: 6px;
-    background-color: var(--bg-tertiary);
-    color: var(--text-primary);
-    font-size: 0.9rem;
-}
-
-.api-key-input input:focus {
-    outline: none;
-    border-color: var(--text-secondary);
-}
-
-.unlock-btn {
-    padding: 12px 20px;
-    background-color: var(--accent-primary);
-    color: var(--text-primary);
-    border: 1px solid var(--border-color);
-    border-radius: 6px;
-    cursor: pointer;
-    font-size: 0.9rem;
-    transition: all 0.2s ease;
-}
-
-.unlock-btn:hover {
-    background-color: var(--accent-hover);
-}
-
-/* Chat Messages */
-.chat-messages {
-    flex: 1;
-    overflow-y: auto;
-    padding: 20px;
-    min-height: 0;
-    display: none;
-    scroll-behavior: smooth;
-}
-
-.chat-message {
-    margin-bottom: 15px;
-    padding: 12px 16px;
-    border-radius: 6px;
-    max-width: 85%;
-    background-color: var(--bg-tertiary);
-    border: 1px solid var(--border-color);
-    animation: fadeIn 0.3s ease-out;
-    transition: all 0.2s ease;
-}
-
-.chat-message:hover {
-    transform: translateX(2px);
-}
-
-.user-message {
-    background-color: var(--accent-primary);
-    margin-left: auto;
-    border: none;
-}
-
-.assistant-message {
-    background-color: var(--bg-tertiary);
-    color: var(--text-primary);
-}
-
-/* Chat Input */
-.chat-input {
-    padding: 15px;
-    border-top: 1px solid var(--border-color);
-    display: none;
-    align-items: flex-end;
-    background-color: var(--bg-tertiary);
-}
-
-.chat-input textarea {
-    flex: 1;
-    padding: 12px;
-    border: 1px solid var(--border-color);
-    border-radius: 6px;
-    resize: none;
-    height: 60px;
-    font-size: 0.9rem;
-    background-color: var(--bg-secondary);
-    color: var(--text-primary);
-    line-height: 1.4;
-}
-
-.chat-input textarea:focus {
-    outline: none;
-    border-color: var(--text-secondary);
-}
-
-.send-btn {
-    padding: 8px 16px;
-    margin-left: 10px;
-    background-color: var(--accent-primary);
-    color: var(--text-primary);
-    border: 1px solid var(--border-color);
-    border-radius: 6px;
-    cursor: pointer;
-    font-size: 0.9rem;
-    transition: all 0.2s ease;
-}
-
-.send-btn:hover {
-    background-color: var(--accent-hover);
-}
-
-/* Scrollbar Styling */
-::-webkit-scrollbar {
-    width: 8px;
-}
-
-::-webkit-scrollbar-track {
-    background: transparent;
-}
-
-::-webkit-scrollbar-thumb {
-    background-color: var(--bg-tertiary);
-    border-radius: 4px;
-    border: 1px solid var(--border-color);
-}
-
-::-webkit-scrollbar-thumb:hover {
-    background-color: var(--hover-color);
-}
-
-/* Responsive Design */
-@media (max-width: 768px) {
-    .app-container {
-        flex-direction: column;
-        padding: 10px;
-    }
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Notes App</title>
+    <link rel="stylesheet" href="styles.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div class="app-container">
+        <!-- Notes Explorer -->
+        <div class="panel notes-explorer">
+            <div class="panel-header">
+                <h2>Notes</h2>
+                <div class="notes-actions">
+                    <button class="manage-tags-btn">Manage Tags</button>
+                    <button class="new-note-btn">New Note</button>
+                    <button class="import-note-btn" title="Import Encrypted Note">
+                        <svg width="16" height="16" viewBox="0 0 16 16">
+                            <path d="M8 15A7 7 0 1 1 8 1a7 7 0 0 1 0 14zm0 1A8 8 0 1 0 8 0a8 8 0 0 0 0 16z"/>
+                            <path d="M8 4a.5.5 0 0 1 .5.5v3h3a.5.5 0 0 1 0 1h-3v3a.5.5 0 0 1-1 0v-3h-3a.5.5 0 0 1 0-1h3v-3A.5.5 0 0 1 8 4z"/>
+                        </svg>
+                    </button>
+                </div>
+            </div>
+            <div class="notes-toolbar">
+                <div class="tag-filter">
+                    <select class="tag-filter-select">
+                        <option value="all">All Tags</option>
+                    </select>
+                </div>
+            </div>
+            <div class="notes-list"></div>
+        </div>
+
+        <!-- Tag Management Modal -->
+        <div class="modal tag-modal">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h3>Manage Tags</h3>
+                    <button class="close-modal">×</button>
+                </div>
+                <div class="modal-body">
+                    <div class="create-tag">
+                        <input type="text" class="tag-name-input" placeholder="New tag name">
+                        <input type="color" class="tag-color-input" value="#3498db">
+                        <button class="add-tag-btn">Add Tag</button>
+                    </div>
+                    <div class="tags-list">
+                        <!-- Tags will be listed here -->
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Note Tag Modal -->
+        <div class="modal note-tags-modal">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h3>Manage Note Tags</h3>
+                    <button class="close-modal">×</button>
+                </div>
+                <div class="modal-body">
+                    <div class="note-tags-list">
+                        <!-- Available tags will be listed here with checkboxes -->
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Main Editor -->
+        <div class="panel main-editor">
+            <div class="panel-header">
+                <div class="editor-actions">
+                    <div class="mode-toggle">
+                        <button class="mode-btn" data-mode="view">
+                            <svg width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
+                                <path d="M16 8s-3-5.5-8-5.5S0 8 0 8s3 5.5 8 5.5S16 8 16 8M1.173 8a13.133 13.133 0 0 1 1.66-2.043C4.12 4.668 5.88 3.5 8 3.5c2.12 0 3.879 1.168 5.168 2.457A13.133 13.133 0 0 1 14.828 8c-.058.087-.122.183-.195.288-.335.48-.83 1.12-1.465 1.755C11.879 11.332 10.119 12.5 8 12.5c-2.12 0-3.879-1.168-5.168-2.457A13.134 13.134 0 0 1 1.172 8z"/>
+                                <path d="M8 5.5a2.5 2.5 0 1 0 0 5 2.5 2.5 0 0 0 0-5M4.5 8a3.5 3.5 0 1 1 7 0 3.5 3.5 0 0 1-7 0"/>
+                            </svg>
+                        </button>
+                        <button class="mode-btn" data-mode="edit">
+                            <svg width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
+                                <path d="M12.854.146a.5.5 0 0 0-.707 0L10.5 1.793 14.207 5.5l1.647-1.646a.5.5 0 0 0 0-.708l-3-3zm.646 6.061L9.793 2.5 3.293 9H3.5a.5.5 0 0 1 .5.5v.5h.5a.5.5 0 0 1 .5.5v.5h.5a.5.5 0 0 1 .5.5v.5h.5a.5.5 0 0 1 .5.5v.207l6.5-6.5zm-7.468 7.468A.5.5 0 0 1 6 13.5V13h-.5a.5.5 0 0 1-.5-.5V12h-.5a.5.5 0 0 1-.5-.5V11h-.5a.5.5 0 0 1-.5-.5V10h-.5a.499.499 0 0 1-.175-.032l-.179.178a.5.5 0 0 0-.11.168l-2 5a.5.5 0 0 0 .65.65l5-2a.5.5 0 0 0 .168-.11l.178-.178z"/>
+                            </svg>
+                        </button>
+                        <button class="mode-btn" data-mode="code">
+                            <svg width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
+                                <path d="M5.854 4.854a.5.5 0 1 0-.708-.708l-3.5 3.5a.5.5 0 0 0 0 .708l3.5 3.5a.5.5 0 0 0 .708-.708L2.707 8l3.147-3.146zm4.292 0a.5.5 0 0 1 .708-.708l3.5 3.5a.5.5 0 0 1 0 .708l-3.5 3.5a.5.5 0 0 1-.708-.708L13.293 8l-3.147-3.146z"/>
+                            </svg>
+                        </button>
+                    </div>
+                    <div class="formatting-tools">
+                        <button class="format-btn" data-command="bold" title="Bold">
+                            <svg width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
+                                <path d="M8.21 13c2.106 0 3.412-1.087 3.412-2.823 0-1.306-.984-2.283-2.324-2.386v-.055a2.176 2.176 0 0 0 1.852-2.14c0-1.51-1.162-2.46-3.014-2.46H3.843V13zM5.908 4.674h1.696c.963 0 1.517.451 1.517 1.244 0 .834-.629 1.32-1.73 1.32H5.908V4.673zm0 6.788V8.598h1.73c1.217 0 1.88.492 1.88 1.415 0 .943-.643 1.449-1.832 1.449H5.907z"/>
+                            </svg>
+                        </button>
+                        <button class="format-btn" data-command="italic" title="Italic">
+                            <svg width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
+                                <path d="M7.991 11.674 9.53 4.455c.123-.595.246-.71 1.347-.807l.11-.52H7.211l-.11.52c1.06.096 1.128.212 1.005.807L6.57 11.674c-.123.595-.246.71-1.346.806l-.11.52h3.774l.11-.52c-1.06-.095-1.129-.211-1.006-.806z"/>
+                            </svg>
+                        </button>
+                        <button class="format-btn" data-command="underline" title="Underline">
+                            <svg width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
+                                <path d="M5.313 3.136h-1.23V9.54c0 2.105 1.47 3.623 3.917 3.623s3.917-1.518 3.917-3.623V3.136h-1.23v6.323c0 1.49-.978 2.57-2.687 2.57-1.709 0-2.687-1.08-2.687-2.57V3.136zM12.5 15h-9v-1h9v1z"/>
+                            </svg>
+                        </button>
+                        <button class="format-btn" data-command="createLink" title="Add Link">
+                            <svg width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
+                                <path d="M4.715 6.542 3.343 7.914a3 3 0 1 0 4.243 4.243l1.828-1.829A3 3 0 0 0 8.586 5.5L8 6.086a1.002 1.002 0 0 0-.154.199 2 2 0 0 1 .861 3.337L6.88 11.45a2 2 0 1 1-2.83-2.83l.793-.792a4.018 4.018 0 0 1-.128-1.287z"/>
+                                <path d="M6.586 4.672A3 3 0 0 0 7.414 9.5l.775-.776a2 2 0 0 1-.896-3.346L9.12 3.55a2 2 0 1 1 2.83 2.83l-.793.792c.112.42.155.855.128 1.287l1.372-1.372a3 3 0 1 0-4.243-4.243L6.586 4.672z"/>
+                            </svg>
+                        </button>
+                    </div>
+                </div>
+                <div class="editor-buttons">
+                    <button class="note-tags-btn">Manage Tags</button>
+                    <button class="export-btn" title="Export Note">
+                        <svg width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
+                            <path d="M.5 9.9a.5.5 0 0 1 .5.5v2.5a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-2.5a.5.5 0 0 1 1 0v2.5a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2v-2.5a.5.5 0 0 1 .5-.5"/>
+                            <path d="M7.646 11.854a.5.5 0 0 0 .708 0l3-3a.5.5 0 0 0-.708-.708L8.5 10.293V1.5a.5.5 0 0 0-1 0v8.793L5.354 8.146a.5.5 0 1 0-.708.708l3 3z"/>
+                        </svg>
+                    </button>
+                    <button class="encrypt-btn" title="Encrypt/Decrypt Note">
+                        <svg width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
+                            <path d="M8 1a2 2 0 0 1 2 2v4H6V3a2 2 0 0 1 2-2m3 6V3a3 3 0 0 0-6 0v4a2 2 0 0 0-2 2v5a2 2 0 0 0 2 2h6a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2"/>
+                        </svg>
+                    </button>
+                    <button class="save-btn">Save</button>
+                    <button class="delete-btn">Delete</button>
+                </div>
+            </div>
+            <div class="editor-content">
+                <div id="note-editor" class="rich-editor" contenteditable="false"></div>
+                <div class="code-editor" style="display: none;">
+                    <div class="code-panels">
+                        <div class="code-panel">
+                            <div class="code-panel-header">HTML</div>
+                            <textarea class="html-editor" spellcheck="false"></textarea>
+                        </div>
+                        <div class="code-panel">
+                            <div class="code-panel-header">CSS</div>
+                            <textarea class="css-editor" spellcheck="false"></textarea>
+                        </div>
+                    </div>
+                    <div class="preview-panel">
+                        <div class="code-panel-header">Preview</div>
+                        <iframe class="preview-frame" sandbox="allow-same-origin"></iframe>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- AI Chatbot -->
+        <div class="panel ai-chatbot">
+            <div class="panel-header">
+                <h2>AI Assistant</h2>
+            </div>
+            <div class="chat-container">
+                <div class="api-key-section">
+                    <div class="lock-icon">🔒</div>
+                    <h3>Unlock AI Assistant</h3>
+                    <p>Enter your OpenAI API key to unlock AI features</p>
+                    <div class="api-key-input">
+                        <input type="password" id="api-key-input" placeholder="Enter API key">
+                        <button class="unlock-btn">Unlock</button>
+                    </div>
+                </div>
+                <div class="chat-messages"></div>
+                <div class="chat-input">
+                    <textarea placeholder="Type your message..."></textarea>
+                    <button class="send-btn">Send</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Quick AI Panel -->
+        <div class="quick-ai-panel">
+            <div class="quick-ai-header">
+                <h3>Quick AI Actions</h3>
+                <button class="close-quick-ai">×</button>
+            </div>
+            <div class="quick-ai-content">
+                <div class="selected-text"></div>
+                <div class="quick-ai-edit-options">
+                    <h4>Edit Options</h4>
+                    <div class="edit-actions">
+                        <button class="edit-btn" data-action="summarize-section">Summarize</button>
+                        <button class="edit-btn" data-action="improve-clarity">Improve Clarity</button>
+                        <button class="edit-btn" data-action="fix-grammar">Fix Grammar</button>
+                        <button class="edit-btn" data-action="add-examples">Add Examples</button>
+                        <button class="edit-btn" data-action="add-research">Add Research</button>
+                        <button class="edit-btn" data-action="add-citations">Add Citations</button>
+                        <button class="edit-btn" data-action="split-sections">Split into Sections</button>
+                        <button class="edit-btn" data-action="change-tone">Change Tone</button>
+                    </div>
+                    <div class="tone-options" style="display: none;">
+                        <select class="tone-select">
+                            <option value="professional">Professional</option>
+                            <option value="casual">Casual</option>
+                            <option value="formal">Formal</option>
+                            <option value="friendly">Friendly</option>
+                            <option value="academic">Academic</option>
+                        </select>
+                        <button class="apply-tone-btn">Apply Tone</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
     
-    .panel {
-        height: auto;
-        margin-bottom: 10px;
-    }
-    
-    .notes-explorer, .ai-chatbot {
-        width: 100%;
-    }
-}
-
-/* Notes Explorer */
-.notes-actions {
-    display: flex;
-    gap: 8px;
-}
-
-.notes-toolbar {
-    padding: 10px 15px;
-    border-bottom: 1px solid var(--border-color);
-    background-color: var(--bg-tertiary);
-}
-
-.tag-filter {
-    width: 100%;
-}
-
-.tag-filter-select {
-    width: 100%;
-    padding: 8px;
-    background-color: var(--bg-secondary);
-    color: var(--text-primary);
-    border: 1px solid var(--border-color);
-    border-radius: 4px;
-    cursor: pointer;
-}
-
-/* Tags */
-.note-tags {
-    display: flex;
-    gap: 4px;
-    flex-wrap: wrap;
-    margin-top: 8px;
-}
-
-.tag {
-    padding: 2px 8px;
-    border-radius: 12px;
-    font-size: 0.75rem;
-    font-weight: 500;
-    cursor: pointer;
-    transition: all 0.2s ease;
-}
-
-.tag:hover {
-    transform: scale(1.05);
-}
-
-/* Modal */
-.modal {
-    display: none;
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background-color: rgba(0, 0, 0, 0.5);
-    z-index: 1000;
-    align-items: center;
-    justify-content: center;
-}
-
-.modal.active {
-    display: flex;
-    animation: fadeIn 0.3s ease-out;
-}
-
-.modal-content {
-    background-color: var(--bg-secondary);
-    border-radius: 8px;
-    width: 90%;
-    max-width: 500px;
-    max-height: 90vh;
-    overflow-y: auto;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
-    animation: scaleIn 0.3s ease-out;
-}
-
-.modal-header {
-    padding: 15px 20px;
-    border-bottom: 1px solid var(--border-color);
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    background-color: var(--bg-tertiary);
-}
-
-.modal-header h3 {
-    font-size: 1.2rem;
-    font-weight: 500;
-    color: var(--text-primary);
-}
-
-.close-modal {
-    background: none;
-    border: none;
-    color: var(--text-secondary);
-    font-size: 1.5rem;
-    cursor: pointer;
-    padding: 0;
-}
-
-.modal-body {
-    padding: 20px;
-}
-
-/* Tag Management */
-.create-tag {
-    display: flex;
-    gap: 8px;
-    margin-bottom: 20px;
-}
-
-.tag-name-input {
-    flex: 1;
-    padding: 8px 12px;
-    background-color: var(--bg-tertiary);
-    color: var(--text-primary);
-    border: 1px solid var(--border-color);
-    border-radius: 4px;
-}
-
-.tag-color-input {
-    width: 40px;
-    height: 40px;
-    padding: 0;
-    border: none;
-    border-radius: 4px;
-    cursor: pointer;
-    background-color: var(--bg-tertiary);
-}
-
-.add-tag-btn {
-    padding: 8px 16px;
-    background-color: var(--accent-primary);
-    color: var(--text-primary);
-    border: 1px solid var(--border-color);
-    border-radius: 4px;
-    cursor: pointer;
-}
-
-.tags-list {
-    display: flex;
-    flex-direction: column;
-    gap: 8px;
-}
-
-.tag-item {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding: 8px 12px;
-    background-color: var(--bg-tertiary);
-    border-radius: 4px;
-    border: 1px solid var(--border-color);
-    transition: all 0.2s ease;
-}
-
-.tag-item:hover {
-    transform: translateX(2px);
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-}
-
-.tag-item-color {
-    width: 16px;
-    height: 16px;
-    border-radius: 50%;
-    margin-right: 8px;
-}
-
-.tag-item-name {
-    flex: 1;
-    color: var(--text-primary);
-}
-
-.delete-tag-btn {
-    background: none;
-    border: none;
-    color: var(--text-secondary);
-    cursor: pointer;
-    padding: 4px 8px;
-}
-
-.delete-tag-btn:hover {
-    color: #ff4444;
-}
-
-/* Note Tags Modal */
-.note-tags-list {
-    display: flex;
-    flex-direction: column;
-    gap: 8px;
-}
-
-.tag-checkbox-item {
-    display: flex;
-    align-items: center;
-    padding: 10px;
-    background-color: var(--bg-tertiary);
-    border: 1px solid var(--border-color);
-    border-radius: 6px;
-    margin-bottom: 8px;
-    cursor: pointer;
-    transition: all 0.2s ease;
-}
-
-.tag-checkbox-item:hover {
-    background-color: var(--accent-primary);
-}
-
-.tag-checkbox-item input[type="checkbox"] {
-    margin-right: 10px;
-}
-
-.tag-checkbox-item .tag-item-color {
-    width: 16px;
-    height: 16px;
-    border-radius: 4px;
-    margin-right: 8px;
-}
-
-.tag-checkbox-item .tag-item-name {
-    color: var(--text-primary);
-    font-size: 0.9rem;
-}
-
-.note-tags-btn {
-    background-color: var(--accent-primary);
-    color: var(--text-primary);
-    border: 1px solid var(--border-color);
-}
-
-.note-tags-btn:hover {
-    background-color: var(--accent-hover);
-}
-
-.save-tags-btn {
-    padding: 6px 12px;
-    margin-left: 10px;
-    background-color: var(--accent-primary);
-    color: var(--text-primary);
-    border: 1px solid var(--border-color);
-    border-radius: 4px;
-    cursor: pointer;
-    font-size: 0.9rem;
-}
-
-.save-tags-btn:hover {
-    background-color: var(--accent-hover);
-}
-
-/* Context Menu */
-.context-menu {
-    display: none;
-    position: fixed;
-    background-color: var(--bg-secondary);
-    border: 1px solid var(--border-color);
-    border-radius: 6px;
-    padding: 8px 0;
-    min-width: 200px;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
-    z-index: 1000;
-    animation: scaleIn 0.2s ease-out;
-}
-
-.context-menu.active {
-    display: block;
-}
-
-.context-menu-header {
-    padding: 8px 12px;
-    color: var(--text-secondary);
-    font-size: 0.8rem;
-    font-weight: 500;
-    border-bottom: 1px solid var(--border-color);
-    margin-bottom: 4px;
-}
-
-.context-menu-tags {
-    max-height: 300px;
-    overflow-y: auto;
-}
-
-.context-menu-tag {
-    display: flex;
-    align-items: center;
-    padding: 6px 12px;
-    cursor: pointer;
-    transition: all 0.2s ease;
-}
-
-.context-menu-tag:hover {
-    background-color: var(--accent-primary);
-    transform: translateX(2px);
-}
-
-.context-menu-tag input[type="checkbox"] {
-    margin-right: 8px;
-}
-
-.context-menu-tag-color {
-    width: 12px;
-    height: 12px;
-    border-radius: 3px;
-    margin-right: 8px;
-}
-
-.context-menu-tag-name {
-    color: var(--text-primary);
-    font-size: 0.9rem;
-    flex: 1;
-}
-
-/* Add a checkmark icon for selected tags */
-.context-menu-tag.selected::after {
-    content: '✓';
-    color: var(--text-secondary);
-    margin-left: 8px;
-}
-
-/* Encryption Styles */
-.encrypt-btn {
-    background-color: var(--accent-primary);
-    color: var(--text-primary);
-    border: 1px solid var(--border-color);
-    padding: 8px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    transition: all 0.3s ease;
-}
-
-.encrypt-btn:hover {
-    background-color: var(--accent-hover);
-    transform: translateY(-1px);
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
-}
-
-.encrypt-btn.encrypted {
-    background-color: #2d5a27;
-}
-
-.encrypt-btn.encrypted:hover {
-    background-color: #346530;
-}
-
-.encryption-modal .modal-body {
-    padding: 20px;
-}
-
-.encryption-form {
-    display: flex;
-    flex-direction: column;
-    gap: 15px;
-}
-
-.encryption-form input {
-    padding: 12px;
-    border-radius: 6px;
-    border: 1px solid var(--border-color);
-    background-color: var(--bg-tertiary);
-    color: var(--text-primary);
-    font-size: 0.9rem;
-}
-
-.encryption-form input:focus {
-    outline: none;
-    border-color: var(--text-secondary);
-}
-
-.encryption-warning {
-    color: #ff6b6b;
-    font-size: 0.85rem;
-    padding: 10px;
-    border-radius: 6px;
-    background-color: rgba(255, 107, 107, 0.1);
-    border: 1px solid rgba(255, 107, 107, 0.2);
-}
-
-.encryption-submit-btn {
-    padding: 12px;
-    background-color: var(--accent-primary);
-    color: var(--text-primary);
-    border: 1px solid var(--border-color);
-    border-radius: 6px;
-    cursor: pointer;
-    font-size: 0.9rem;
-    transition: all 0.2s ease;
-}
-
-.encryption-submit-btn:hover {
-    background-color: var(--accent-hover);
-}
-
-/* Encrypted note styles */
-.note-item.encrypted::after {
-    content: '🔒';
-    margin-left: 8px;
-    font-size: 0.9rem;
-}
-
-.encrypted-content-placeholder {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    height: 100%;
-    color: var(--text-secondary);
-    text-align: center;
-    padding: 20px;
-}
-
-.encrypted-content-placeholder svg {
-    width: 48px;
-    height: 48px;
-    margin-bottom: 15px;
-    opacity: 0.5;
-}
-
-.encrypted-content-placeholder h3 {
-    font-size: 1.2rem;
-    margin-bottom: 10px;
-    font-weight: 500;
-}
-
-.encrypted-content-placeholder p {
-    font-size: 0.9rem;
-    max-width: 300px;
-    line-height: 1.5;
-}
-
-.context-menu-section {
-    padding: 4px 0;
-    border-bottom: 1px solid var(--border-color);
-}
-
-.context-menu-item {
-    padding: 8px 12px;
-    color: var(--text-primary);
-    cursor: pointer;
-    transition: background-color 0.2s ease;
-    font-size: 0.9rem;
-    display: flex;
-    align-items: center;
-    gap: 8px;
-}
-
-.context-menu-item:hover {
-    background-color: var(--accent-primary);
-}
-
-.context-menu-item-export {
-    color: #4CAF50;
-}
-
-.context-menu-item-export:hover {
-    background-color: rgba(76, 175, 80, 0.1);
-}
-
-/* Code Editor */
-.code-editor {
-    display: none;
-    height: 100%;
-    gap: 1px;
-    background-color: var(--border-color);
-}
-
-.code-editor.active {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-}
-
-.code-panels {
-    display: grid;
-    grid-template-rows: 1fr 1fr;
-    gap: 1px;
-    background-color: var(--border-color);
-}
-
-.code-panel {
-    display: flex;
-    flex-direction: column;
-    background-color: var(--bg-secondary);
-    overflow: hidden;
-}
-
-.code-panel-header {
-    padding: 8px 12px;
-    background-color: var(--bg-tertiary);
-    color: var(--text-secondary);
-    font-size: 0.85rem;
-    font-weight: 500;
-    border-bottom: 1px solid var(--border-color);
-}
-
-.html-editor, .css-editor {
-    flex: 1;
-    padding: 12px;
-    background-color: var(--bg-secondary);
-    color: var(--text-primary);
-    border: none;
-    resize: none;
-    font-family: 'Menlo', 'Monaco', 'Courier New', monospace;
-    font-size: 0.9rem;
-    line-height: 1.5;
-    tab-size: 2;
-}
-
-.html-editor:focus, .css-editor:focus {
-    outline: none;
-}
-
-.preview-panel {
-    background-color: var(--bg-secondary);
-    display: flex;
-    flex-direction: column;
-}
-
-.preview-frame {
-    flex: 1;
-    border: none;
-    background-color: white;
-}
-
-/* Code mode specific styles */
-.code-mode .rich-editor {
-    display: none;
-}
-
-.code-mode .code-editor {
-    display: grid;
-}
-
-/* Mode button styles for code mode */
-.mode-btn[data-mode="code"] {
-    font-family: 'Menlo', 'Monaco', 'Courier New', monospace;
-}
-
-.mode-btn[data-mode="code"].active {
-    background-color: var(--accent-primary);
-    color: var(--text-primary);
-}
-
-/* Syntax highlighting colors */
-.html-editor, .css-editor {
-    color: #d4d4d4;
-}
-
-.html-editor ::selection, .css-editor ::selection {
-    background-color: rgba(255, 255, 255, 0.2);
-}
-
-/* Custom scrollbar for code editors */
-.html-editor::-webkit-scrollbar, .css-editor::-webkit-scrollbar {
-    width: 8px;
-    height: 8px;
-}
-
-.html-editor::-webkit-scrollbar-track, .css-editor::-webkit-scrollbar-track {
-    background: var(--bg-secondary);
-}
-
-.html-editor::-webkit-scrollbar-thumb, .css-editor::-webkit-scrollbar-thumb {
-    background-color: var(--accent-primary);
-    border-radius: 4px;
-}
-
-/* Export Button */
-.export-btn {
-    background-color: var(--accent-primary);
-    color: var(--text-primary);
-    border: 1px solid var(--border-color);
-    padding: 8px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-}
-
-.export-btn:hover {
-    background-color: var(--accent-hover);
-}
-
-/* Export Modal */
-.export-options {
-    display: flex;
-    flex-direction: column;
-    gap: 16px;
-}
-
-.export-option {
-    background-color: var(--bg-tertiary);
-    border: 1px solid var(--border-color);
-    border-radius: 8px;
-    padding: 16px;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    transition: all 0.2s ease;
-}
-
-.export-option:hover {
-    background-color: var(--accent-primary);
-}
-
-.export-option-header {
-    flex: 1;
-}
-
-.export-option-header h4 {
-    color: var(--text-primary);
-    font-size: 1rem;
-    margin-bottom: 4px;
-}
-
-.export-option-desc {
-    color: var(--text-secondary);
-    font-size: 0.85rem;
-}
-
-.export-option-btn {
-    padding: 8px 16px;
-    background-color: var(--accent-primary);
-    color: var(--text-primary);
-    border: 1px solid var(--border-color);
-    border-radius: 6px;
-    cursor: pointer;
-    font-size: 0.9rem;
-    transition: all 0.2s ease;
-    white-space: nowrap;
-}
-
-.export-option-btn:hover {
-    background-color: var(--accent-hover);
-}
-
-.note-description-controls {
-    margin: 8px 0;
-    padding: 8px;
-    background: var(--bg-tertiary);
-    border-radius: 4px;
-}
-
-.description-toggle {
-    margin-bottom: 8px;
-}
-
-.description-toggle label {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    color: var(--text-primary);
-    font-size: 0.9em;
-}
-
-.custom-description {
-    width: 100%;
-    min-height: 60px;
-    padding: 8px;
-    border: 1px solid var(--border-color);
-    border-radius: 4px;
-    background: var(--bg-secondary);
-    color: var(--text-primary);
-    font-size: 0.9em;
-    resize: vertical;
-    transition: all 0.2s ease;
-}
-
-.custom-description:focus {
-    transform: translateY(-1px);
-    box-shadow: 0 0 0 2px var(--accent-primary);
-}
-
-.refresh-summary-btn {
-    display: flex;
-    align-items: center;
-    gap: 6px;
-    padding: 6px 12px;
-    background: var(--bg-secondary);
-    border: 1px solid var(--border-color);
-    border-radius: 4px;
-    color: var(--text-primary);
-    cursor: pointer;
-    font-size: 0.9em;
-    transition: all 0.2s ease;
-}
-
-.refresh-summary-btn:hover {
-    background: var(--bg-hover);
-}
-
-.refresh-summary-btn svg {
-    fill: currentColor;
-}
-
-.refresh-summary-btn:active {
-    transform: scale(0.95);
-}
-
-.custom-desc-toggle {
-    margin: 0;
-}
-
-.editor-description-controls {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    margin-right: 16px;
-    padding: 8px 12px;
-    background: var(--bg-tertiary);
-    border: 1px solid var(--border-color);
-    border-radius: 6px;
-    transition: all 0.3s ease;
-}
-
-.description-toggle {
-    display: flex;
-    align-items: center;
-}
-
-.description-toggle label {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    color: var(--text-primary);
-    font-size: 0.9em;
-    white-space: nowrap;
-}
-
-.refresh-summary-btn:active svg {
-    animation: spin 0.5s linear;
-}
-
-/* Animations and Effects */
-@keyframes fadeIn {
-    from { opacity: 0; transform: translateY(10px); }
-    to { opacity: 1; transform: translateY(0); }
-}
-
-@keyframes slideIn {
-    from { transform: translateX(-20px); opacity: 0; }
-    to { transform: translateX(0); opacity: 1; }
-}
-
-@keyframes scaleIn {
-    from { transform: scale(0.95); opacity: 0; }
-    to { transform: scale(1); opacity: 1; }
-}
-
-@keyframes glow {
-    0% { box-shadow: 0 0 0 rgba(255, 255, 255, 0.1); }
-    50% { box-shadow: 0 0 10px rgba(255, 255, 255, 0.2); }
-    100% { box-shadow: 0 0 0 rgba(255, 255, 255, 0.1); }
-}
-
-/* Apply animations to elements */
-.note-item {
-    animation: slideIn 0.3s ease-out;
-    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-}
-
-.note-item:hover {
-    transform: translateX(4px) scale(1.01);
-    background-color: var(--accent-primary);
-}
-
-.note-item.active {
-    animation: glow 2s infinite;
-}
-
-.panel {
-    animation: scaleIn 0.4s ease-out;
-    transition: all 0.3s ease;
-}
-
-.modal.active {
-    animation: fadeIn 0.3s ease-out;
-}
-
-.modal-content {
-    animation: scaleIn 0.3s ease-out;
-}
-
-button {
-    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
-}
-
-button:active {
-    transform: scale(0.95);
-}
-
-.format-btn:hover, .mode-btn:hover {
-    transform: translateY(-1px);
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
-}
-
-.chat-message {
-    animation: fadeIn 0.3s ease-out;
-    transition: all 0.2s ease;
-}
-
-.chat-message:hover {
-    transform: translateX(2px);
-}
-
-.tag {
-    transition: all 0.2s ease;
-}
-
-.tag:hover {
-    transform: scale(1.05);
-}
-
-.rich-editor {
-    transition: all 0.3s ease;
-}
-
-.rich-editor:focus {
-    box-shadow: 0 0 0 2px var(--accent-primary);
-}
-
-/* Smooth scrolling */
-.notes-list, .chat-messages, .modal-content {
-    scroll-behavior: smooth;
-}
-
-/* Input field effects */
-input[type="text"], 
-input[type="password"], 
-textarea {
-    transition: all 0.3s ease;
-}
-
-input[type="text"]:focus, 
-input[type="password"]:focus, 
-textarea:focus {
-    box-shadow: 0 0 0 2px var(--accent-primary);
-    transform: translateY(-1px);
-}
-
-/* Quick AI Panel effects */
-.quick-ai-panel {
-    animation: fadeIn 0.3s ease-out;
-    transition: all 0.3s ease;
-}
-
-.quick-ai-btn:hover {
-    transform: translateY(-1px);
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
-}
-
-/* Description controls effects */
-.editor-description-controls {
-    transition: all 0.3s ease;
-}
-
-.custom-description {
-    transition: all 0.2s ease;
-}
-
-.custom-description:focus {
-    transform: translateY(-1px);
-    box-shadow: 0 0 0 2px var(--accent-primary);
-}
-
-/* Tag management effects */
-.tag-item {
-    transition: all 0.2s ease;
-}
-
-.tag-item:hover {
-    transform: translateX(2px);
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-}
-
-/* Context menu effects */
-.context-menu {
-    animation: scaleIn 0.2s ease-out;
-}
-
-.context-menu-tag {
-    transition: all 0.2s ease;
-}
-
-.context-menu-tag:hover {
-    transform: translateX(2px);
-}
-
-/* Encryption button effect */
-.encrypt-btn {
-    transition: all 0.3s ease;
-}
-
-.encrypt-btn:hover {
-    transform: translateY(-1px);
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
-}
-
-/* Loading state animations */
-@keyframes pulse {
-    0% { opacity: 1; }
-    50% { opacity: 0.5; }
-    100% { opacity: 1; }
-}
-
-.loading {
-    animation: pulse 1.5s infinite ease-in-out;
-}
-
-/* Refresh button rotation animation */
-@keyframes spin {
-    from { transform: rotate(0deg); }
-    to { transform: rotate(360deg); }
-}
-
-.refresh-summary-btn:active svg {
-    animation: spin 0.5s linear;
-}
-
-/* Import Note Button */
-.import-note-btn {
-    background-color: var(--accent-primary);
-    color: var(--text-primary);
-    border: 1px solid var(--border-color);
-    padding: 8px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    transition: all 0.3s ease;
-}
-
-.import-note-btn:hover {
-    background-color: var(--accent-hover);
-    transform: translateY(-1px);
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
-}
-
-.import-note-btn svg {
-    fill: currentColor;
-}
-
-/* Import Modal Styles */
-.import-form {
-    display: flex;
-    flex-direction: column;
-    gap: 20px;
-}
-
-.file-input-container {
-    display: flex;
-    flex-direction: column;
-    gap: 10px;
-}
-
-.note-file-input {
-    display: none;
-}
-
-.file-input-label {
-    display: inline-block;
-    padding: 12px 20px;
-    background-color: var(--accent-primary);
-    color: var(--text-primary);
-    border: 1px solid var(--border-color);
-    border-radius: 6px;
-    cursor: pointer;
-    font-size: 0.9rem;
-    text-align: center;
-    transition: all 0.2s ease;
-}
-
-.file-input-label:hover {
-    background-color: var(--accent-hover);
-    transform: translateY(-1px);
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
-}
-
-.selected-file-name {
-    color: var(--text-secondary);
-    font-size: 0.9rem;
-    padding: 8px;
-    background-color: var(--bg-tertiary);
-    border-radius: 4px;
-    word-break: break-all;
-}
-
-.password-input-container {
-    display: flex;
-    flex-direction: column;
-    gap: 8px;
-}
-
-.import-password {
-    padding: 12px;
-    border-radius: 6px;
-    border: 1px solid var(--border-color);
-    background-color: var(--bg-tertiary);
-    color: var(--text-primary);
-    font-size: 0.9rem;
-    transition: all 0.3s ease;
-}
-
-.import-password:focus {
-    outline: none;
-    border-color: var(--text-secondary);
-    transform: translateY(-1px);
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
-}
-
-.import-submit-btn {
-    padding: 12px;
-    background-color: var(--accent-primary);
-    color: var(--text-primary);
-    border: 1px solid var(--border-color);
-    border-radius: 6px;
-    cursor: pointer;
-    font-size: 0.9rem;
-    transition: all 0.2s ease;
-}
-
-.import-submit-btn:hover {
-    background-color: var(--accent-hover);
-    transform: translateY(-1px);
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
-}
-
-.import-submit-btn:disabled {
-    opacity: 0.5;
-    cursor: not-allowed;
-    transform: none;
-    box-shadow: none;
-}
-
-/* Encryption Animation Styles */
-.encryption-animation-container {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100vw;
-    height: 100vh;
-    background-color: rgba(0, 0, 0, 0.85);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    z-index: 9999;
-    pointer-events: none;
-}
-
-.loading-animation {
-    position: relative;
-    width: 80px;
-    height: 80px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-}
-
-.loading-circle {
-    width: 48px;
-    height: 48px;
-    border: 3px solid transparent;
-    border-top-color: var(--text-primary);
-    border-radius: 50%;
-    animation: spin 1s linear infinite;
-}
-
-.loading-circle::after {
-    content: '';
-    position: absolute;
-    top: 5px;
-    left: 5px;
-    right: 5px;
-    bottom: 5px;
-    border: 3px solid transparent;
-    border-top-color: var(--text-primary);
-    border-radius: 50%;
-    opacity: 0.6;
-    animation: spin 2s linear infinite;
-}
-
-.encryption-status {
-    position: absolute;
-    bottom: -40px;
-    left: 50%;
-    transform: translateX(-50%);
-    color: var(--text-primary);
-    font-size: 1.2rem;
-    font-weight: 500;
-    white-space: nowrap;
-    opacity: 0;
-    animation: fadeInStatus 0.3s forwards;
-}
-
-@keyframes spin {
-    0% { transform: rotate(0deg); }
-    100% { transform: rotate(360deg); }
-}
-
-@keyframes fadeInStatus {
-    from { opacity: 0; transform: translate(-50%, 10px); }
-    to { opacity: 1; transform: translate(-50%, 0); }
-}
-
-/* AI Thinking Effect */
-.ai-thinking {
-    position: relative;
-    opacity: 0.7;
-    transition: opacity 0.3s ease;
-}
-
-.ai-thinking::after {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background: linear-gradient(
-        90deg,
-        transparent,
-        var(--accent-primary) 50%,
-        transparent
-    );
-    animation: thinking-scan 1.5s linear infinite;
-    pointer-events: none;
-}
-
-.ai-cursor {
-    display: inline-block;
-    width: 2px;
-    height: 1.2em;
-    background-color: var(--text-primary);
-    margin-left: 2px;
-    vertical-align: middle;
-    animation: cursor-blink 1s step-end infinite;
-}
-
-@keyframes thinking-scan {
-    0% {
-        transform: translateX(-100%);
-        opacity: 0;
-    }
-    50% {
-        opacity: 0.2;
-    }
-    100% {
-        transform: translateX(100%);
-        opacity: 0;
-    }
-}
-
-@keyframes cursor-blink {
-    0%, 100% { opacity: 0; }
-    50% { opacity: 1; }
-}
-
-/* AI Processing Indicator */
-.ai-processing {
-    position: fixed;
-    bottom: 20px;
-    right: 20px;
-    background-color: var(--bg-tertiary);
-    border: 1px solid var(--border-color);
-    border-radius: 6px;
-    padding: 12px 20px;
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    z-index: 1000;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
-    animation: slideInRight 0.3s ease-out;
-}
-
-.ai-processing-dots {
-    display: flex;
-    gap: 4px;
-}
-
-.ai-processing-dot {
-    width: 6px;
-    height: 6px;
-    background-color: var(--text-primary);
-    border-radius: 50%;
-    opacity: 0.3;
-    animation: dot-pulse 1.5s infinite;
-}
-
-.ai-processing-dot:nth-child(2) {
-    animation-delay: 0.2s;
-}
-
-.ai-processing-dot:nth-child(3) {
-    animation-delay: 0.4s;
-}
-
-@keyframes dot-pulse {
-    0%, 100% { opacity: 0.3; transform: scale(1); }
-    50% { opacity: 1; transform: scale(1.2); }
-}
-
-@keyframes slideInRight {
-    from {
-        transform: translateX(100%);
-        opacity: 0;
-    }
-    to {
-        transform: translateX(0);
-        opacity: 1;
-    }
-}
-
-/* Deep Search Section */
-.deep-search-section {
-    padding: 12px;
-    border-top: 1px solid var(--border-color);
-    margin-top: 10px;
-}
-
-.deep-search-header {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    margin-bottom: 10px;
-}
-
-.deep-search-header h4 {
-    color: var(--text-primary);
-    font-size: 0.9rem;
-    font-weight: 500;
-}
-
-.deep-search-header svg {
-    width: 16px;
-    height: 16px;
-    color: var(--text-secondary);
-}
-
-.deep-search-results {
-    display: flex;
-    flex-direction: column;
-    gap: 12px;
-    max-height: 300px;
-    overflow-y: auto;
-}
-
-.search-result-item {
-    padding: 12px;
-    background-color: var(--bg-secondary);
-    border: 1px solid var(--border-color);
-    border-radius: 6px;
-    cursor: pointer;
-    transition: all 0.2s ease;
-    animation: fadeIn 0.3s ease-out;
-}
-
-.search-result-item:hover {
-    background-color: var(--accent-primary);
-    transform: translateX(4px);
-}
-
-.search-result-title {
-    color: var(--text-primary);
-    font-size: 0.9rem;
-    font-weight: 500;
-    margin-bottom: 6px;
-}
-
-.search-result-preview {
-    color: var(--text-secondary);
-    font-size: 0.85rem;
-    line-height: 1.4;
-}
-
-.search-result-meta {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    margin-top: 8px;
-    font-size: 0.8rem;
-    color: var(--text-secondary);
-}
-
-.search-result-date {
-    padding: 2px 6px;
-    background-color: var(--bg-tertiary);
-    border-radius: 4px;
-}
-
-.deep-search-btn {
-    width: 100%;
-    padding: 10px;
-    background-color: var(--accent-primary);
-    color: var(--text-primary);
-    border: 1px solid var(--border-color);
-    border-radius: 6px;
-    cursor: pointer;
-    font-size: 0.9rem;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 8px;
-    transition: all 0.2s ease;
-}
-
-.deep-search-btn:hover {
-    background-color: var(--accent-hover);
-    transform: translateY(-1px);
-}
-
-.deep-search-btn svg {
-    width: 16px;
-    height: 16px;
-}
-
-/* AI Analysis Styles */
-.analysis-container {
-    padding: 12px;
-    background-color: var(--bg-secondary);
-    border-radius: 6px;
-    animation: fadeIn 0.3s ease-out;
-}
-
-.analysis-point {
-    color: var(--text-primary);
-    font-weight: 500;
-    margin: 12px 0 8px 0;
-    padding-left: 8px;
-    border-left: 2px solid var(--accent-primary);
-}
-
-.analysis-text {
-    color: var(--text-secondary);
-    font-size: 0.9rem;
-    line-height: 1.5;
-    margin: 8px 0;
-    padding-left: 8px;
-}
-
-/* Update deep search button for AI */
-.deep-search-btn {
-    background-color: var(--accent-primary);
-    border: 1px solid var(--border-color);
-    padding: 10px;
-    width: 100%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 8px;
-    margin-top: 12px;
-    transition: all 0.2s ease;
-}
-
-.deep-search-btn:hover {
-    background-color: var(--accent-hover);
-    transform: translateY(-1px);
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
-}
-
-.deep-search-btn svg {
-    width: 16px;
-    height: 16px;
-}
-
-/* Loading animation for AI analysis */
-.deep-search-results.loading::after {
-    content: '';
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    width: 24px;
-    height: 24px;
-    border: 2px solid var(--text-secondary);
-    border-top-color: var(--accent-primary);
-    border-radius: 50%;
-    animation: spin 1s linear infinite;
-}
-
-/* AI Analysis Modal Styles */
-.ai-analysis-modal .modal-content {
-    max-width: 800px;
-    width: 90%;
-    max-height: 90vh;
-}
-
-.modal-selected-text {
-    background-color: var(--bg-tertiary);
-    padding: 15px;
-    border-radius: 6px;
-    margin-bottom: 20px;
-}
-
-.modal-selected-text h4 {
-    color: var(--text-secondary);
-    font-size: 0.9rem;
-    margin-bottom: 10px;
-}
-
-.selected-text-content {
-    color: var(--text-primary);
-    font-size: 1rem;
-    line-height: 1.5;
-    white-space: pre-wrap;
-}
-
-.modal-analysis {
-    padding: 20px;
-    font-size: 1.1rem;
-}
-
-.modal-analysis .analysis-point {
-    font-size: 1.1rem;
-    margin: 20px 0 12px 0;
-    padding-left: 12px;
-}
-
-.modal-analysis .analysis-text {
-    font-size: 1rem;
-    margin: 12px 0;
-    padding-left: 12px;
-}
-
-/* Expand Button Styles */
-.deep-search-header {
-    position: relative;
-}
-
-.expand-analysis-btn {
-    position: absolute;
-    right: 0;
-    top: 50%;
-    transform: translateY(-50%);
-    background: none;
-    border: none;
-    padding: 6px;
-    cursor: pointer;
-    color: var(--text-secondary);
-    transition: all 0.2s ease;
-}
-
-.expand-analysis-btn:hover {
-    color: var(--text-primary);
-    transform: translateY(-50%) scale(1.1);
-}
-
-.expand-analysis-btn svg {
-    width: 16px;
-    height: 16px;
-}
-
-/* Animation for modal */
-.ai-analysis-modal.active .modal-content {
-    animation: modalSlideIn 0.3s ease-out;
-}
-
-@keyframes modalSlideIn {
-    from {
-        opacity: 0;
-        transform: translateY(-20px);
-    }
-    to {
-        opacity: 1;
-        transform: translateY(0);
-    }
-}
-
-.analysis-results {
-    padding: 1rem;
-    background: var(--bg-color);
-    border-radius: 8px;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-}
-
-.analysis-section {
-    margin-bottom: 1.5rem;
-}
-
-.analysis-heading {
-    color: var(--primary-color);
-    font-size: 1.2rem;
-    font-weight: 600;
-    margin-bottom: 0.5rem;
-    padding-bottom: 0.25rem;
-    border-bottom: 2px solid var(--border-color);
-}
-
-.analysis-content {
-    padding-left: 1rem;
-}
-
-.analysis-content p {
-    margin: 0.5rem 0;
-    line-height: 1.5;
-}
-
-.analysis-content ul {
-    margin: 0.5rem 0;
-    padding-left: 1.5rem;
-}
-
-.analysis-content li {
-    margin: 0.25rem 0;
-    line-height: 1.4;
-} 
+    <!-- Note Context Menu -->
+    <div class="context-menu" id="noteContextMenu">
+        <div class="context-menu-header">Manage Tags</div>
+        <div class="context-menu-tags">
+            <!-- Tags will be populated here -->
+        </div>
+    </div>
+
+    <!-- Encryption Password Modal -->
+    <div class="modal encryption-modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 class="encryption-modal-title">Encrypt Note</h3>
+                <button class="close-modal">×</button>
+            </div>
+            <div class="modal-body">
+                <div class="encryption-form">
+                    <input type="password" class="encryption-password" placeholder="Enter password">
+                    <div class="encryption-confirm-password-container" style="display: none;">
+                        <input type="password" class="encryption-confirm-password" placeholder="Confirm password">
+                    </div>
+                    <div class="encryption-warning">
+                        Warning: If you forget this password, there is no way to recover the note content.
+                    </div>
+                    <button class="encryption-submit-btn">Encrypt</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Export Modal -->
+    <div class="modal export-modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Export Note</h3>
+                <button class="close-modal">×</button>
+            </div>
+            <div class="modal-body">
+                <div class="export-options">
+                    <div class="export-option" data-format="markdown">
+                        <div class="export-option-header">
+                            <h4>Markdown</h4>
+                            <span class="export-option-desc">Best for sharing on GitHub, documentation sites</span>
+                        </div>
+                        <button class="export-option-btn" data-format="markdown">Export as .md</button>
+                    </div>
+                    <div class="export-option" data-format="html">
+                        <div class="export-option-header">
+                            <h4>HTML</h4>
+                            <span class="export-option-desc">Complete webpage with styles</span>
+                        </div>
+                        <button class="export-option-btn" data-format="html">Export as .html</button>
+                    </div>
+                    <div class="export-option" data-format="pdf-html">
+                        <div class="export-option-header">
+                            <h4>PDF-ready HTML</h4>
+                            <span class="export-option-desc">Optimized for PDF conversion</span>
+                        </div>
+                        <button class="export-option-btn" data-format="pdf-html">Export as .html</button>
+                    </div>
+                    <div class="export-option" data-format="txt">
+                        <div class="export-option-header">
+                            <h4>Plain Text</h4>
+                            <span class="export-option-desc">Simple text without formatting</span>
+                        </div>
+                        <button class="export-option-btn" data-format="txt">Export as .txt</button>
+                    </div>
+                    <div class="export-option" data-format="pdf">
+                        <div class="export-option-header">
+                            <h4>PDF</h4>
+                            <span class="export-option-desc">Professional document format</span>
+                        </div>
+                        <button class="export-option-btn" data-format="pdf">Export as .pdf</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Import Modal -->
+    <div class="modal import-modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Import Encrypted Note</h3>
+                <button class="close-modal">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="import-form">
+                    <div class="file-input-container">
+                        <input type="file" id="noteFileInput" accept=".json" class="note-file-input">
+                        <label for="noteFileInput" class="file-input-label">Choose File</label>
+                        <span class="selected-file-name">No file selected</span>
+                    </div>
+                    <div class="password-input-container">
+                        <input type="password" class="import-password" placeholder="Enter decryption password">
+                    </div>
+                    <button class="import-submit-btn">Import Note</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+    <script src="app.js"></script>
+</body>
+</html> 
