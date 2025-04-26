@@ -2,6 +2,38 @@
 const APP_NAME = 'Notes';
 document.title = APP_NAME;
 
+// Add styles for the Format Better button
+const formatBetterStyles = document.createElement('style');
+formatBetterStyles.textContent = `
+    .quick-ai-panel .edit-options {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 8px;
+        padding: 12px;
+    }
+
+    .quick-ai-panel .edit-btn {
+        background-color: #1e1e1e;
+        color: #ffffff;
+        border: none;
+        padding: 8px 12px;
+        border-radius: 4px;
+        cursor: pointer;
+        font-size: 14px;
+        text-align: center;
+        transition: background-color 0.2s;
+    }
+
+    .quick-ai-panel .edit-btn:hover {
+        background-color: #2d2d2d;
+    }
+
+    .quick-ai-panel .edit-btn:active {
+        background-color: #3d3d3d;
+    }
+`;
+document.head.appendChild(formatBetterStyles);
+
 // DOM Elements
 const notesList = document.querySelector('.notes-list');
 const noteEditor = document.getElementById('note-editor');
@@ -831,14 +863,21 @@ function extractTitle(content) {
     const tempDiv = document.createElement('div');
     tempDiv.innerHTML = content;
     
-    // Try to find the first heading
-    const heading = tempDiv.querySelector('h1, h2, h3, h4, h5, h6');
-    if (heading) {
-        return heading.textContent;
-    }
+    // Replace <br>, </p>, </div> with newlines to ensure proper line separation
+    const htmlWithLineBreaks = tempDiv.innerHTML
+        .replace(/<br\s*\/?>/gi, '\n')
+        .replace(/<\/p>/gi, '\n')
+        .replace(/<\/div>/gi, '\n');
     
-    // If no heading, use the first line of text
-    const firstLine = tempDiv.textContent.split('\n')[0].trim();
+    // Create a new div with the processed HTML
+    const processedDiv = document.createElement('div');
+    processedDiv.innerHTML = htmlWithLineBreaks;
+    
+    // Get text content and split by newline
+    const lines = processedDiv.textContent.split('\n');
+    // Find first non-empty line
+    const firstLine = lines.find(line => line.trim().length > 0);
+    
     return firstLine || 'Untitled Note';
 }
 
@@ -1046,10 +1085,47 @@ function handleTextSelection() {
         quickAIPanel.classList.add('visible');
         selectedTextDisplay.textContent = selectedText;
         
-        // Add deep search section to Quick AI panel
-        if (!quickAIPanel.contains(deepSearchSection)) {
-            quickAIPanel.appendChild(deepSearchSection);
-        }
+        // Create the Quick AI panel content
+        quickAIPanel.innerHTML = `
+            <div class="quick-ai-header">Edit Options</div>
+            <div class="edit-options">
+                <button class="edit-btn" data-action="summarize">Summarize</button>
+                <button class="edit-btn" data-action="improve-clarity">Improve Clarity</button>
+                <button class="edit-btn" data-action="fix-grammar">Fix Grammar</button>
+                <button class="edit-btn" data-action="add-examples">Add Examples</button>
+                <button class="edit-btn" data-action="add-research">Add Research</button>
+                <button class="edit-btn" data-action="add-citations">Add Citations</button>
+                <button class="edit-btn" data-action="change-tone">Change Tone</button>
+                <button class="edit-btn" data-action="format-better">Format Better</button>
+            </div>
+            <div class="deep-search-section">
+                <div class="deep-search-header">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <circle cx="11" cy="11" r="8"></circle>
+                        <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+                    </svg>
+                    <h4>AI Deep Analysis</h4>
+                    <button class="expand-analysis-btn" title="Open in full view">
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M15 3h6v6M9 21H3v-6M21 3l-7 7M3 21l7-7"/>
+                        </svg>
+                    </button>
+                </div>
+                <div class="deep-search-results"></div>
+            </div>
+        `;
+
+        // Add event listeners to the buttons
+        quickAIPanel.querySelectorAll('.edit-btn').forEach(button => {
+            button.addEventListener('click', () => {
+                const action = button.dataset.action;
+                if (action === 'change-tone' && toneOptions) {
+                    toneOptions.style.display = 'flex';
+                } else {
+                    handleQuickAIAction(action);
+                }
+            });
+        });
         
         // Perform initial AI analysis
         performAIAnalysis(selectedText);
@@ -1192,6 +1268,17 @@ async function handleQuickAIAction(action) {
     let systemPrompt = '';
     
     switch (action) {
+        case 'format-better':
+            prompt = `Format and structure the following text to be more readable and well-organized. Maintain the same information but improve its presentation with proper HTML formatting, headings, lists, and paragraphs where appropriate: "${selectedText}"`;
+            systemPrompt = `You are an expert at formatting and structuring text. Rules:
+                1. Use semantic HTML elements (h1-h6, p, ul, ol, li)
+                2. Break down long paragraphs into digestible chunks
+                3. Add proper hierarchy with headings
+                4. Use lists for enumerated items or steps
+                5. Maintain consistent spacing
+                6. Keep the original meaning intact
+                7. Only output the formatted HTML`;
+            break;
         case 'add-citations':
             systemPrompt = `You are a helpful AI assistant that adds academic citations. Rules:
                 1. ONLY output the modified text with citations
@@ -1267,12 +1354,12 @@ async function handleQuickAIAction(action) {
             
             // For editing actions, replace the selected text
             if (['summarize-section', 'improve-clarity', 'fix-grammar', 'add-examples', 
-                 'add-research', 'add-citations'].includes(action)) {
+                 'add-research', 'add-citations', 'format-better'].includes(action)) {
                 const range = window.getSelection().getRangeAt(0);
                 const tempDiv = document.createElement('div');
                 
-                // For citations, use the response directly as it's already in HTML format
-                if (action === 'add-citations') {
+                // For citations and format-better, use the response directly as it's already in HTML format
+                if (action === 'add-citations' || action === 'format-better') {
                     tempDiv.innerHTML = editedText;
                 } else {
                     // For other actions, wrap the text in a paragraph
@@ -1290,26 +1377,15 @@ async function handleQuickAIAction(action) {
                     range.insertNode(node.cloneNode(true));
                 });
                 
-                // If this is a citation, ensure the references section is properly placed
-                if (action === 'add-citations') {
-                    const referencesDiv = tempDiv.querySelector('.references');
-                    if (referencesDiv) {
-                        // Move references to the end of the note
-                        const existingRefs = noteEditor.querySelector('.references');
-                        if (existingRefs) {
-                            existingRefs.remove();
-                        }
-                        noteEditor.appendChild(referencesDiv.cloneNode(true));
-                    }
-                }
-                
+                // Save the note after making changes
                 saveCurrentNote();
+                
+                // Hide the quick AI panel
+                quickAIPanel.style.display = 'none';
             } else {
                 // For non-editing actions, show in chat
                 addMessageToChat(editedText, 'assistant');
             }
-            
-            quickAIPanel.style.display = 'none';
         }
     } catch (error) {
         console.error('Error:', error);
