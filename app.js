@@ -269,9 +269,6 @@ function init() {
         loadNote(notes[0].id);
     }
     
-    // Initialize the Quick AI panel
-    initializeQuickAIPanel();
-    
     setupEventListeners();
     setMode('view'); // Start in view mode
     setupExportHandlers();
@@ -1144,135 +1141,123 @@ function handleTextSelection() {
     selectedText = selection.toString().trim();
 
     if (selectedText) {
-        // Instead of rebuilding the entire panel, just update the selected text and show it
-        const selectedTextDiv = quickAIPanel.querySelector('.selected-text');
-        if (selectedTextDiv) {
-            selectedTextDiv.textContent = selectedText;
-        }
-        
-        // Show the panel
         quickAIPanel.classList.add('visible');
-        
-        // Perform initial AI analysis if API key is available
-        if (apiKey) {
-            performAIAnalysis(selectedText);
-        }
-    } else {
-        quickAIPanel.classList.remove('visible');
-    }
-}
-
-// Add this function to initialize the Quick AI panel
-function initializeQuickAIPanel() {
-    quickAIPanel.innerHTML = `
-        <div class="quick-ai-header">
-            <h3>Quick AI Actions</h3>
-            <button class="close-quick-ai">×</button>
-        </div>
-        <div class="quick-ai-content">
-            <div class="selected-text"></div>
-            <div class="quick-ai-edit-options">
-                <h4>Edit Options</h4>
-                <div class="edit-actions">
-                    <button class="edit-btn" data-action="summarize">Summarize</button>
-                    <button class="edit-btn" data-action="clarify">Clarify</button>
-                    <button class="edit-btn" data-action="fix-grammar">Fix Grammar</button>
-                    <button class="edit-btn" data-action="add-examples">Add Examples</button>
-                    <button class="edit-btn" data-action="add-research">Add Research</button>
-                    <button class="edit-btn" data-action="add-citations">Add Citations</button>
-                    <button class="edit-btn" data-action="change-tone">Change Tone</button>
-                    <button class="edit-btn" data-action="format-better">Format Better</button>
-                    <button class="edit-btn" data-action="split-sections">Split into Sections</button>
-                </div>
-                <div class="tone-options" style="display: none;">
-                    <select class="tone-select">
-                        <option value="professional">Professional</option>
-                        <option value="casual">Casual</option>
-                        <option value="formal">Formal</option>
-                        <option value="friendly">Friendly</option>
-                        <option value="academic">Academic</option>
-                    </select>
-                    <button class="apply-tone-btn">Apply Tone</button>
-                </div>
+        // Rebuild the panel UI
+        quickAIPanel.innerHTML = `
+            <div class="quick-ai-header">
+                <h3>Quick AI Actions</h3>
+                <button class="close-quick-ai">×</button>
             </div>
-            <div class="deep-search-section">
-                <div class="deep-search-header">
-                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                        <path d="M12 2a10 10 0 1 0 10 10A10 10 0 0 0 12 2zm0 18a8 8 0 1 1 8-8 8 8 0 0 1-8 8z"/>
-                        <path d="M12 6a2 2 0 1 0 2 2 2 2 0 0 0-2-2zm0 10a1 1 0 0 0-1-1h0a1 1 0 0 0-1 1v0a1 1 0 0 0 1 1h0a1 1 0 0 0 1-1z"/>
-                    </svg>
-                    <h4>AI Deep Analysis</h4>
-                    <button class="expand-analysis-btn" title="Open in full view">
+            <div class="quick-ai-content">
+                <div class="selected-text">${selectedText}</div>
+                <div class="quick-ai-edit-options">
+                    <h4>Edit Options</h4>
+                    <div class="edit-actions">
+                        <button class="edit-btn" data-action="summarize">Summarize</button>
+                        <button class="edit-btn" data-action="clarify">Clarify</button>
+                        <button class="edit-btn" data-action="fix-grammar">Fix Grammar</button>
+                        <button class="edit-btn" data-action="add-examples">Add Examples</button>
+                        <button class="edit-btn" data-action="add-research">Add Research</button>
+                        <button class="edit-btn" data-action="add-citations">Add Citations</button>
+                        <button class="edit-btn" data-action="change-tone">Change Tone</button>
+                        <button class="edit-btn" data-action="format-better">Format Better</button>
+                        <button class="edit-btn" data-action="split-sections">Split into Sections</button>
+                    </div>
+                    <div class="tone-options" style="display: none;">
+                        <select class="tone-select">
+                            <option value="professional">Professional</option>
+                            <option value="casual">Casual</option>
+                            <option value="formal">Formal</option>
+                            <option value="friendly">Friendly</option>
+                            <option value="academic">Academic</option>
+                        </select>
+                        <button class="apply-tone-btn">Apply Tone</button>
+                    </div>
+                </div>
+                <div class="deep-search-section">
+                    <div class="deep-search-header">
                         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                            <path d="M15 3h6v6M9 21H3v-6M21 3l-7 7M3 21l7-7"/>
+                            <path d="M12 2a10 10 0 1 0 10 10A10 10 0 0 0 12 2zm0 18a8 8 0 1 1 8-8 8 8 0 0 1-8 8z"/>
+                            <path d="M12 6a2 2 0 1 0 2 2 2 2 0 0 0-2-2zm0 10a1 1 0 0 0-1-1h0a1 1 0 0 0-1 1v0a1 1 0 0 0 1 1h0a1 1 0 0 0 1-1z"/>
                         </svg>
+                        <h4>AI Deep Analysis</h4>
+                        <button class="expand-analysis-btn" title="Open in full view">
+                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M15 3h6v6M9 21H3v-6M21 3l-7 7M3 21l7-7"/>
+                            </svg>
+                        </button>
+                    </div>
+                    <div class="deep-search-results"></div>
+                    <button class="deep-search-btn">
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M12 2a10 10 0 1 0 10 10A10 10 0 0 0 12 2zm0 18a8 8 0 1 1 8-8 8 8 0 0 1-8 8z"/>
+                            <path d="M15 9l-6 6M9 9l6 6"/>
+                        </svg>
+                        Analyze with AI
                     </button>
                 </div>
-                <div class="deep-search-results"></div>
-                <button class="deep-search-btn">
-                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                        <path d="M12 2a10 10 0 1 0 10 10A10 10 0 0 0 12 2zm0 18a8 8 0 1 1 8-8 8 8 0 0 1-8 8z"/>
-                        <path d="M15 9l-6 6M9 9l6 6"/>
-                    </svg>
-                    Analyze with AI
-                </button>
             </div>
-        </div>
-    `;
+        `;
 
-    // Add event listeners to the buttons
-    quickAIPanel.querySelectorAll('.edit-btn').forEach(button => {
-        button.addEventListener('click', () => {
-            const action = button.dataset.action;
-            if (action === 'change-tone') {
-                const toneOptions = quickAIPanel.querySelector('.tone-options');
-                if (toneOptions) {
-                    toneOptions.style.display = 'flex';
+        // Add event listeners to the buttons
+        quickAIPanel.querySelectorAll('.edit-btn').forEach(button => {
+            button.addEventListener('click', () => {
+                const action = button.dataset.action;
+                if (action === 'change-tone') {
+                    const toneOptions = quickAIPanel.querySelector('.tone-options');
+                    if (toneOptions) {
+                        toneOptions.style.display = 'flex';
+                    }
+                } else {
+                    handleQuickAIAction(action);
                 }
-            } else {
-                handleQuickAIAction(action);
-            }
+            });
         });
-    });
 
-    // Add event listener for the apply tone button
-    const applyToneBtn = quickAIPanel.querySelector('.apply-tone-btn');
-    const toneSelect = quickAIPanel.querySelector('.tone-select');
-    if (applyToneBtn && toneSelect) {
-        applyToneBtn.addEventListener('click', () => {
-            const tone = toneSelect.value;
-            handleToneChange(tone);
-        });
-    }
+        // Add event listener for the apply tone button
+        const applyToneBtn = quickAIPanel.querySelector('.apply-tone-btn');
+        const toneSelect = quickAIPanel.querySelector('.tone-select');
+        if (applyToneBtn && toneSelect) {
+            applyToneBtn.addEventListener('click', () => {
+                const tone = toneSelect.value;
+                handleToneChange(tone);
+            });
+        }
 
-    // Add close button event listener
-    const closeBtn = quickAIPanel.querySelector('.close-quick-ai');
-    if (closeBtn) {
-        closeBtn.addEventListener('click', () => {
-            quickAIPanel.classList.remove('visible');
-        });
-    }
+        // Add close button event listener
+        const closeBtn = quickAIPanel.querySelector('.close-quick-ai');
+        if (closeBtn) {
+            closeBtn.addEventListener('click', () => {
+                quickAIPanel.classList.remove('visible');
+            });
+        }
 
-    // Add deep search button event listener
-    const deepSearchBtn = quickAIPanel.querySelector('.deep-search-btn');
-    if (deepSearchBtn) {
-        deepSearchBtn.addEventListener('click', () => {
-            if (!apiKey) {
-                alert('Please unlock the AI Assistant first');
-                return;
-            }
-            performAIAnalysis(selectedText);
-        });
-    }
+        // Add event listener for deep search button
+        const deepSearchBtn = quickAIPanel.querySelector('.deep-search-btn');
+        if (deepSearchBtn) {
+            deepSearchBtn.addEventListener('click', () => {
+                if (!apiKey) {
+                    alert('Please unlock the AI Assistant first');
+                    return;
+                }
+                performAIAnalysis(selectedText);
+            });
+        }
 
-    // Add expand analysis button event listener
-    const expandBtn = quickAIPanel.querySelector('.expand-analysis-btn');
-    if (expandBtn) {
-        expandBtn.addEventListener('click', () => {
-            if (selectedText && lastAnalysis) {
-                openAnalysisModal(selectedText, lastAnalysis);
-            }
-        });
+        // Add event listener for expand analysis button
+        const expandBtn = quickAIPanel.querySelector('.expand-analysis-btn');
+        if (expandBtn) {
+            expandBtn.addEventListener('click', () => {
+                if (selectedText && lastAnalysis) {
+                    openAnalysisModal(selectedText, lastAnalysis);
+                }
+            });
+        }
+
+        // Perform initial AI analysis
+        performAIAnalysis(selectedText);
+    } else {
+        quickAIPanel.classList.remove('visible');
     }
 }
 
@@ -1310,7 +1295,7 @@ async function performAIAnalysis(text) {
         return;
     }
 
-    const deepSearchResults = deepSearchSection.querySelector('.deep-search-results');
+    const deepSearchResults = quickAIPanel.querySelector('.deep-search-results');
     deepSearchResults.innerHTML = `
         <div style="color: var(--text-secondary); text-align: center; padding: 20px;">
             AI is analyzing...
@@ -1347,9 +1332,34 @@ async function performAIAnalysis(text) {
 
 Please format your response with clear headings and bullet points where appropriate.`;
 
-        const response = await sendToAI(prompt);
-        lastAnalysis = response;
-        displayAIResults(response, deepSearchResults);
+        const response = await fetch('https://api.openai.com/v1/chat/completions', {
+            method: 'POST',
+            headers: {
+                'Authorization': `Bearer ${apiKey}`,
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                model: 'gpt-3.5-turbo',
+                messages: [
+                    {
+                        role: 'system',
+                        content: 'You are an AI assistant providing deep analysis of text. Be thorough but concise.'
+                    },
+                    {
+                        role: 'user',
+                        content: prompt
+                    }
+                ],
+                max_tokens: 1000,
+                temperature: 0.7
+            })
+        });
+
+        const data = await response.json();
+        if (data.choices && data.choices[0]) {
+            lastAnalysis = data.choices[0].message.content;
+            displayAIResults(lastAnalysis, deepSearchResults);
+        }
     } catch (error) {
         console.error('AI Analysis Error:', error);
         deepSearchResults.innerHTML = `
@@ -1358,42 +1368,6 @@ Please format your response with clear headings and bullet points where appropri
             </div>
         `;
     }
-}
-
-// Function to send prompt to AI
-async function sendToAI(prompt) {
-    if (!apiKey) {
-        throw new Error('Please unlock the AI Assistant first');
-    }
-
-    const response = await fetch('https://api.openai.com/v1/chat/completions', {
-        method: 'POST',
-        headers: {
-            'Authorization': `Bearer ${apiKey}`,
-            'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({
-            model: 'gpt-3.5-turbo',
-            messages: [
-                {
-                    role: 'system',
-                    content: 'You are an AI assistant providing deep analysis of text. Be thorough but concise.'
-                },
-                {
-                    role: 'user',
-                    content: prompt
-                }
-            ],
-            max_tokens: 500,
-            temperature: 0.7
-        })
-    });
-
-    const data = await response.json();
-    if (data.choices && data.choices[0]) {
-        return data.choices[0].message.content;
-    }
-    throw new Error('No response from AI');
 }
 
 // Function to display AI analysis results
@@ -1425,6 +1399,7 @@ function displayAIResults(text, container) {
     container.innerHTML = html;
 }
 
+// Add the formatAnalysisContent function
 function formatAnalysisContent(text) {
     // Convert markdown-style bullet points to HTML
     let html = text
@@ -1458,7 +1433,7 @@ function openAnalysisModal(selectedText, analysisContent) {
     `;
     
     // Display the analysis in the modal
-    displayAIResults(analysisContent, analysisContainer, true);
+    displayAIResults(analysisContent, analysisContainer);
     
     // Show the modal
     modal.classList.add('active');
