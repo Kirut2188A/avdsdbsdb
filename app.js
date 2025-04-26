@@ -34,6 +34,33 @@ formatBetterStyles.textContent = `
 `;
 document.head.appendChild(formatBetterStyles);
 
+// Add styles for the undo button
+const undoStyles = document.createElement('style');
+undoStyles.textContent = `
+    .quick-ai-panel .undo-btn {
+        background-color: #2d2d2d;
+        color: #ffffff;
+        border: none;
+        padding: 8px 12px;
+        border-radius: 4px;
+        cursor: pointer;
+        font-size: 14px;
+        margin: 8px 12px;
+        width: calc(100% - 24px);
+        text-align: center;
+        transition: background-color 0.2s;
+    }
+
+    .quick-ai-panel .undo-btn:hover {
+        background-color: #3d3d3d;
+    }
+
+    .quick-ai-panel .undo-btn:active {
+        background-color: #4d4d4d;
+    }
+`;
+document.head.appendChild(undoStyles);
+
 // DOM Elements
 const notesList = document.querySelector('.notes-list');
 const noteEditor = document.getElementById('note-editor');
@@ -1079,18 +1106,25 @@ function addMessageToChat(message, sender) {
 // Update handleTextSelection function
 function handleTextSelection() {
     const selection = window.getSelection();
-    selectedText = selection.toString().trim(); // Update the global selectedText variable
+    selectedText = selection.toString().trim();
 
     if (selectedText) {
         quickAIPanel.classList.add('visible');
         selectedTextDisplay.textContent = selectedText;
         
-        // Create the Quick AI panel content
+        // Store the original text and selection range for undo
+        const range = selection.getRangeAt(0);
+        lastEdit = {
+            text: selectedText,
+            range: range.cloneRange(),
+            action: null
+        };
+        
         quickAIPanel.innerHTML = `
             <div class="quick-ai-header">Edit Options</div>
             <div class="edit-options">
                 <button class="edit-btn" data-action="summarize">Summarize</button>
-                <button class="edit-btn" data-action="improve-clarity">Improve Clarity</button>
+                <button class="edit-btn" data-action="clarify">Clarify</button>
                 <button class="edit-btn" data-action="fix-grammar">Fix Grammar</button>
                 <button class="edit-btn" data-action="add-examples">Add Examples</button>
                 <button class="edit-btn" data-action="add-research">Add Research</button>
@@ -1098,6 +1132,7 @@ function handleTextSelection() {
                 <button class="edit-btn" data-action="change-tone">Change Tone</button>
                 <button class="edit-btn" data-action="format-better">Format Better</button>
             </div>
+            <button class="undo-btn" style="display: none;">Undo Last Change</button>
             <div class="deep-search-section">
                 <div class="deep-search-header">
                     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -1126,12 +1161,43 @@ function handleTextSelection() {
                 }
             });
         });
+
+        // Add undo button event listener
+        const undoBtn = quickAIPanel.querySelector('.undo-btn');
+        if (undoBtn) {
+            undoBtn.addEventListener('click', handleUndo);
+        }
         
         // Perform initial AI analysis
         performAIAnalysis(selectedText);
     } else {
         quickAIPanel.classList.remove('visible');
     }
+}
+
+// Add this variable at the top with other state variables
+let lastEdit = null;
+
+// Add the handleUndo function
+function handleUndo() {
+    if (!lastEdit) return;
+    
+    const selection = window.getSelection();
+    selection.removeAllRanges();
+    selection.addRange(lastEdit.range);
+    
+    const tempDiv = document.createElement('div');
+    tempDiv.innerHTML = lastEdit.text;
+    
+    const range = selection.getRangeAt(0);
+    range.deleteContents();
+    while (tempDiv.firstChild) {
+        range.insertNode(tempDiv.firstChild);
+    }
+    
+    saveCurrentNote();
+    quickAIPanel.querySelector('.undo-btn').style.display = 'none';
+    lastEdit = null;
 }
 
 // Add AI analysis functionality
@@ -1269,46 +1335,28 @@ async function handleQuickAIAction(action) {
     
     switch (action) {
         case 'format-better':
-            prompt = `Format and structure the following text to be more readable and well-organized. Maintain the same information but improve its presentation with proper HTML formatting, headings, lists, and paragraphs where appropriate: "${selectedText}"`;
-            systemPrompt = `You are an expert at formatting and structuring text. Rules:
-                1. Use semantic HTML elements (h1-h6, p, ul, ol, li)
-                2. Break down long paragraphs into digestible chunks
-                3. Add proper hierarchy with headings
-                4. Use lists for enumerated items or steps
-                5. Maintain consistent spacing
-                6. Keep the original meaning intact
-                7. Only output the formatted HTML`;
+            prompt = `Format and structure the following text to be more readable and well-organized. Follow these rules strictly:
+1. Maintain the exact same information and meaning
+2. Use proper semantic HTML elements
+3. Break long paragraphs into smaller, focused ones
+4. Add appropriate headings (h2-h6) for sections
+5. Convert lists of items into proper <ul> or <ol>
+6. Add spacing between sections
+7. Keep important emphasis and links
+8. Do not add or remove any factual content
+9. Do not change the writing style or tone
+Text to format: "${selectedText}"`;
+            systemPrompt = `You are an expert at formatting and structuring text while preserving its exact meaning. Output only the formatted HTML with no explanations or extra text. Focus on:
+1. Semantic HTML structure (h2-h6, p, ul, ol, li, strong, em)
+2. Logical section breaks
+3. Proper list formatting
+4. Consistent spacing
+5. Preserving all original content
+6. Maintaining the original tone and style`;
             break;
-        case 'add-citations':
-            systemPrompt = `You are a helpful AI assistant that adds academic citations. Rules:
-                1. ONLY output the modified text with citations
-                2. Add (Author, Year) citations inline
-                3. Add a references section at the end
-                4. Do not explain or add any other text
-                5. Do not include the original text in quotes
-                6. Example input: "Machine learning is transforming healthcare"
-                   Example output: <p>Machine learning is transforming healthcare (Smith, 2023).</p><div class="references"><p>References:</p><p>Smith, J. (2023). The Impact of Machine Learning on Healthcare. Journal of Medical AI, 15(2), 45-67.</p></div>`;
-            prompt = selectedText;
-            break;
-        case 'explain':
-            prompt = `Explain the following text in simple terms: "${selectedText}"`;
-            systemPrompt = 'You are a helpful AI assistant that provides clear and concise explanations.';
-            break;
-        case 'summarize':
-            prompt = `Summarize the following text: "${selectedText}"`;
-            systemPrompt = 'You are a helpful AI assistant that provides clear and concise summaries.';
-            break;
-        case 'expand':
-            prompt = `Expand on the following text with more details and examples: "${selectedText}"`;
-            systemPrompt = 'You are a helpful AI assistant that provides detailed expansions of text.';
-            break;
-        case 'summarize-section':
-            prompt = `Create a concise summary of this section: "${selectedText}"`;
-            systemPrompt = 'You are a helpful AI assistant that provides clear and concise summaries.';
-            break;
-        case 'improve-clarity':
-            prompt = `Improve the clarity and readability of this text while maintaining its meaning: "${selectedText}"`;
-            systemPrompt = 'You are a helpful AI assistant that improves text clarity while preserving meaning.';
+        case 'clarify':
+            prompt = `Make the following text clearer and more concise while maintaining its key points: "${selectedText}"`;
+            systemPrompt = 'You are an expert at making text clearer and more concise while preserving key information.';
             break;
         case 'fix-grammar':
             prompt = `Fix any grammatical errors in this text: "${selectedText}"`;
@@ -1321,6 +1369,33 @@ async function handleQuickAIAction(action) {
         case 'add-research':
             prompt = `Add research-backed information to support this statement: "${selectedText}"`;
             systemPrompt = 'You are a helpful AI assistant that adds research citations and evidence to support statements.';
+            break;
+        case 'add-citations':
+            systemPrompt = `You are a helpful AI assistant that adds academic citations. Rules:
+                1. ONLY output the modified text with citations
+                2. Add (Author, Year) citations inline
+                3. Add a references section at the end
+                4. Do not explain or add any other text
+                5. Do not include the original text in quotes
+                6. Example input: "Machine learning is transforming healthcare"
+                   Example output: <p>Machine learning is transforming healthcare (Smith, 2023).</p><div class="references"><p>References:</p><p>Smith, J. (2023). The Impact of Machine Learning on Healthcare. Journal of Medical AI, 15(2), 45-67.</p></div>`;
+            prompt = selectedText;
+            break;
+        case 'summarize':
+            prompt = `Summarize the following text: "${selectedText}"`;
+            systemPrompt = 'You are a helpful AI assistant that provides clear and concise summaries.';
+            break;
+        case 'summarize-section':
+            prompt = `Create a concise summary of this section: "${selectedText}"`;
+            systemPrompt = 'You are a helpful AI assistant that provides clear and concise summaries.';
+            break;
+        case 'improve-clarity':
+            prompt = `Improve the clarity and readability of this text while maintaining its meaning: "${selectedText}"`;
+            systemPrompt = 'You are a helpful AI assistant that improves text clarity while preserving meaning.';
+            break;
+        case 'change-tone':
+            prompt = `Rewrite the following text in a different tone while maintaining its meaning: "${selectedText}"`;
+            systemPrompt = 'You are a helpful AI assistant that can rewrite text in different tones while preserving the original meaning.';
             break;
     }
 
@@ -1343,7 +1418,7 @@ async function handleQuickAIAction(action) {
                         content: prompt
                     }
                 ],
-                max_tokens: 500,
+                max_tokens: 1000,
                 temperature: 0.7
             })
         });
@@ -1352,40 +1427,43 @@ async function handleQuickAIAction(action) {
         if (data.choices && data.choices[0]) {
             const editedText = data.choices[0].message.content;
             
-            // For editing actions, replace the selected text
-            if (['summarize-section', 'improve-clarity', 'fix-grammar', 'add-examples', 
+            if (['summarize-section', 'improve-clarity', 'clarify', 'fix-grammar', 'add-examples', 
                  'add-research', 'add-citations', 'format-better'].includes(action)) {
                 const range = window.getSelection().getRangeAt(0);
                 const tempDiv = document.createElement('div');
                 
-                // For citations and format-better, use the response directly as it's already in HTML format
                 if (action === 'add-citations' || action === 'format-better') {
                     tempDiv.innerHTML = editedText;
                 } else {
-                    // For other actions, wrap the text in a paragraph
                     tempDiv.innerHTML = `<p>${editedText}</p>`;
                 }
                 
-                // Sanitize the HTML content
                 sanitizeHTML(tempDiv);
                 
-                // Replace the selected text with the sanitized content
-                range.deleteContents();
+                // Store the current state for undo
+                lastEdit = {
+                    text: range.cloneContents().cloneNode(true).textContent,
+                    range: range.cloneRange(),
+                    action: action
+                };
                 
-                // Insert each child node to preserve formatting
+                range.deleteContents();
                 Array.from(tempDiv.childNodes).forEach(node => {
                     range.insertNode(node.cloneNode(true));
                 });
                 
-                // Save the note after making changes
                 saveCurrentNote();
                 
-                // Hide the quick AI panel
-                quickAIPanel.style.display = 'none';
+                // Show the undo button
+                const undoBtn = quickAIPanel.querySelector('.undo-btn');
+                if (undoBtn) {
+                    undoBtn.style.display = 'block';
+                }
             } else {
-                // For non-editing actions, show in chat
                 addMessageToChat(editedText, 'assistant');
             }
+            
+            quickAIPanel.style.display = 'none';
         }
     } catch (error) {
         console.error('Error:', error);
